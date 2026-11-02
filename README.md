@@ -18,3 +18,4 @@
 ## Progress Log
 
 - **2026-11-01** – Project setup: created folder structure (`prompts/`, `src/`, `assets/screenshots/`, `docs/`), saved the setup prompt, and wrote the README intro.
+- 2026-11-02 – Added team roles document (Raghad).
