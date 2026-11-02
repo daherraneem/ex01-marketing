@@ -1,0 +1,1112 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AURA – סרטון השקה (v1)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Heebo:wght@200;300;400;600&family=Cormorant+Garamond:ital,wght@1,500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --cream: #FFF6EC;
+    --gold: #D9A441;
+    --plum: #4A1E3A;
+    --bg: #14070f;
+  }
+  * { box-sizing: border-box; }
+  html, body {
+    margin: 0; height: 100%; overflow: hidden;
+    background: var(--bg); color: var(--cream);
+    font-family: 'Heebo', system-ui, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    user-select: none;
+  }
+  #stage, #stage canvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
+  .layer { position: absolute; inset: 0; pointer-events: none; }
+
+  /* ---------- captions ---------- */
+  .caption {
+    position: absolute; left: 0; right: 0; bottom: 9%;
+    text-align: center; direction: rtl;
+    font-weight: 300; font-size: clamp(20px, 4.6vmin, 46px); letter-spacing: .02em;
+    text-shadow: 0 0 18px rgba(232,163,61,.55), 0 2px 10px rgba(0,0,0,.7);
+    opacity: 0; transform: translateY(12px);
+    transition: opacity .8s ease, transform .8s ease;
+  }
+  .caption.show { opacity: 1; transform: none; }
+
+  /* ---------- shade labels (projected from 3D) ---------- */
+  .shade-label {
+    position: absolute; left: 0; top: 0;
+    font-size: clamp(11px, 1.8vmin, 16px); font-weight: 400; letter-spacing: .08em;
+    color: var(--cream); white-space: nowrap;
+    padding: .25em .8em; border-radius: 99px;
+    background: rgba(20,7,15,.45); border: 1px solid rgba(255,246,236,.18);
+    backdrop-filter: blur(4px);
+    opacity: 0; will-change: transform, opacity;
+  }
+  .shade-label i {
+    display: inline-block; width: .7em; height: .7em; border-radius: 50%;
+    margin-inline-end: .5em; vertical-align: -.05em;
+    box-shadow: 0 0 8px currentColor;
+  }
+
+  /* ---------- end card ---------- */
+  .logo {
+    position: absolute; top: 5%; left: 0; right: 0; text-align: center;
+    font-weight: 200; font-size: clamp(44px, 13vmin, 150px);
+    letter-spacing: .4em; padding-left: .4em; /* balance trailing letter-spacing */
+    background: linear-gradient(180deg, #FFF6EC 10%, #F0CF8E 55%, #D9A441 90%);
+    -webkit-background-clip: text; background-clip: text; color: transparent;
+    filter: drop-shadow(0 0 22px rgba(217,164,65,.55));
+    opacity: 0; transform: scale(.94); transition: opacity 1.2s ease, transform 1.6s ease;
+  }
+  .slogan {
+    position: absolute; top: calc(5% + clamp(44px, 13vmin, 150px) * 1.18); left: 0; right: 0;
+    text-align: center;
+    font-family: 'Cormorant Garamond', Georgia, serif; font-style: italic; font-weight: 500;
+    font-size: clamp(18px, 3.6vmin, 36px); color: #F6E3C4; letter-spacing: .03em;
+    text-shadow: 0 0 14px rgba(232,163,61,.5);
+    opacity: 0; transform: translateY(8px); transition: opacity 1s ease, transform 1s ease;
+  }
+  .logo.show { opacity: 1; transform: none; }
+  .slogan.show { opacity: 1; transform: none; }
+
+  /* ---------- progress ---------- */
+  #progress { position: absolute; left: 0; right: 0; bottom: 0; height: 3px; background: rgba(255,246,236,.08); transition: opacity .6s; }
+  #progress i { display: block; height: 100%; width: 0; background: linear-gradient(90deg, #7A4A3A, #A3214B, #C0283A, #F4A582, #E8A33D); box-shadow: 0 0 8px rgba(232,163,61,.7); }
+
+  /* ---------- intro (Play) ---------- */
+  #intro {
+    position: absolute; inset: 0; display: flex; flex-direction: column;
+    align-items: center; justify-content: center; gap: 2.2vmin;
+    background: radial-gradient(ellipse at center, rgba(74,30,58,.55), rgba(20,7,15,.92) 70%);
+    transition: opacity .8s ease;
+  }
+  #intro.hide { opacity: 0; pointer-events: none; }
+  #intro .mark {
+    font-weight: 200; font-size: clamp(40px, 11vmin, 120px); letter-spacing: .4em; padding-left: .4em;
+    background: linear-gradient(180deg, #FFF6EC, #D9A441); -webkit-background-clip: text; background-clip: text; color: transparent;
+    filter: drop-shadow(0 0 18px rgba(217,164,65,.45));
+  }
+  #intro .sub { font-weight: 300; font-size: clamp(14px, 2.6vmin, 22px); opacity: .85; }
+  #intro .hint { font-weight: 300; font-size: clamp(11px, 1.9vmin, 15px); opacity: .55; }
+
+  .btn {
+    pointer-events: auto; cursor: pointer;
+    font-family: inherit; font-size: clamp(15px, 2.6vmin, 22px); font-weight: 400;
+    color: var(--plum); background: linear-gradient(180deg, #F3CF87, var(--gold));
+    border: 0; border-radius: 99px; padding: .7em 2em;
+    box-shadow: 0 0 0 1px rgba(255,246,236,.25) inset, 0 6px 30px rgba(217,164,65,.35);
+    transition: transform .2s, box-shadow .2s;
+  }
+  .btn:hover { transform: translateY(-2px); box-shadow: 0 0 0 1px rgba(255,246,236,.35) inset, 0 10px 40px rgba(217,164,65,.55); }
+  .btn:focus-visible { outline: 2px solid var(--cream); outline-offset: 3px; }
+  .btn.ghost { color: var(--cream); background: rgba(255,246,236,.08); box-shadow: 0 0 0 1px rgba(255,246,236,.3) inset; }
+
+  #endControls {
+    position: absolute; left: 0; right: 0; bottom: 2.2%;
+    display: flex; gap: 12px; justify-content: center;
+    opacity: 0; transition: opacity .8s ease; pointer-events: none;
+  }
+  #endControls.show { opacity: 1; }
+  #endControls.show .btn { pointer-events: auto; }
+  #endControls .btn { pointer-events: none; font-size: clamp(12px, 2vmin, 16px); padding: .55em 1.4em; }
+  #orbitHint {
+    position: absolute; top: 2.5%; left: 0; right: 0; text-align: center;
+    font-size: clamp(11px, 1.9vmin, 15px); opacity: 0; transition: opacity .5s;
+  }
+  #orbitHint.show { opacity: .7; }
+</style>
+</head>
+<body>
+
+<div id="stage"></div>
+
+<div class="layer" id="labels"></div>
+
+<div class="layer" id="overlay">
+  <div class="logo" id="logo" dir="ltr">AURA</div>
+  <div class="slogan" id="slogan"><bdi dir="ltr">Your glow, freshly made.</bdi></div>
+
+  <div class="caption" data-from="3.4" data-to="7.9">מה שמזין אותך…</div>
+  <div class="caption" data-from="8.4" data-to="12.9">…הופך לזוהר</div>
+  <div class="caption" data-from="17.4" data-to="999">הזוהר שלך מתחיל כאן</div>
+
+  <div id="orbitHint">גררו כדי לסובב את המצלמה · גלגלת לזום</div>
+  <div id="progress"><i></i></div>
+</div>
+
+<div class="layer" id="endControls">
+  <button class="btn" id="replayBtn">↻ צפייה חוזרת</button>
+  <button class="btn ghost" id="orbitBtn">סיבוב חופשי במצלמה</button>
+</div>
+
+<div id="intro">
+  <div class="mark" dir="ltr">AURA</div>
+  <div class="sub">סרטון השקה · <bdi dir="ltr">Lip Tint</bdi></div>
+  <button class="btn" id="playBtn">▶ הפעל</button>
+  <div class="hint">מומלץ לצפות עם סאונד 🔊</div>
+</div>
+
+<script type="importmap">
+{
+  "imports": {
+    "three": "https://cdn.jsdelivr.net/npm/three@0.169.0/build/three.module.js",
+    "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.169.0/examples/jsm/"
+  }
+}
+</script>
+
+<script type="module">
+import * as THREE from 'three';
+import { EffectComposer } from 'three/addons/postprocessing/EffectComposer.js';
+import { RenderPass } from 'three/addons/postprocessing/RenderPass.js';
+import { UnrealBloomPass } from 'three/addons/postprocessing/UnrealBloomPass.js';
+import { OutputPass } from 'three/addons/postprocessing/OutputPass.js';
+import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
+
+/* =========================================================
+   AURA – 3D launch film, v1
+   Timeline (seconds):
+   0–3    tube appears and turns            | soft opening tone
+   3–8    5 foods float in, each with aura  | chime per food
+   8–13   auras swirl into the tube, fills  | whoosh + "plops"
+   13–16  cap opens, tint line drawn in air | pop + sparkle
+   16–20  AURA logo + slogan + caption      | closing chord
+   ========================================================= */
+
+const DURATION = 20;
+const V = THREE.Vector3;
+
+const SHADES = [
+  { name: 'Honey Glaze',      hex: '#E8A33D', boost: 1.5 },
+  { name: 'Peach Nectar',     hex: '#F4A582', boost: 1.3 },
+  { name: 'Berry Juice',      hex: '#A3214B', boost: 2.2 },
+  { name: 'Pomegranate Drop', hex: '#C0283A', boost: 2.0 },
+  { name: 'Cocoa Kiss',       hex: '#7A4A3A', boost: 2.8 },
+];
+
+/* ---------- helpers ---------- */
+const clamp01 = x => Math.min(1, Math.max(0, x));
+const seg = (t, a, b) => clamp01((t - a) / (b - a));
+const easeOutCubic = x => 1 - Math.pow(1 - x, 3);
+const easeInOutCubic = x => x < .5 ? 4 * x * x * x : 1 - Math.pow(-2 * x + 2, 3) / 2;
+const easeOutBack = x => { const c1 = 1.70158, c3 = c1 + 1; return 1 + c3 * Math.pow(x - 1, 3) + c1 * Math.pow(x - 1, 2); };
+const smooth = x => x * x * (3 - 2 * x);
+const pulse = (t, c, w) => Math.exp(-Math.pow((t - c) / w, 2));
+
+/* =========================================================
+   Renderer, scene, camera, post-processing
+   ========================================================= */
+const stage = document.getElementById('stage');
+const renderer = new THREE.WebGLRenderer({ antialias: true, powerPreference: 'high-performance' });
+renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+renderer.toneMapping = THREE.ACESFilmicToneMapping;
+renderer.toneMappingExposure = 1.0;
+stage.appendChild(renderer.domElement);
+
+const scene = new THREE.Scene();
+scene.background = new THREE.Color('#14070f');
+const camera = new THREE.PerspectiveCamera(40, 16 / 9, 0.1, 100);
+
+const pmrem = new THREE.PMREMGenerator(renderer);
+scene.environment = pmrem.fromScene(new RoomEnvironment(), 0.04).texture;
+scene.environmentIntensity = 0.55;
+
+const composer = new EffectComposer(renderer);
+composer.setPixelRatio(renderer.getPixelRatio());
+composer.addPass(new RenderPass(scene, camera));
+const bloom = new UnrealBloomPass(new THREE.Vector2(16, 9), 0.85, 0.6, 0.72);
+composer.addPass(bloom);
+composer.addPass(new OutputPass());
+
+const controls = new OrbitControls(camera, renderer.domElement);
+controls.enabled = false;
+controls.enableDamping = true;
+controls.minDistance = 3;
+controls.maxDistance = 14;
+
+/* ---------- warm gradient backdrop (shader sphere) ---------- */
+const bgMat = new THREE.ShaderMaterial({
+  side: THREE.BackSide, depthWrite: false,
+  uniforms: {
+    uTop: { value: new THREE.Color('#2b0f22') },
+    uBottom: { value: new THREE.Color('#0c0408') },
+    uGlow: { value: new THREE.Color('#6a3418') },
+    uGlowAmt: { value: 0.4 },
+  },
+  vertexShader: `varying vec3 vDir;
+    void main(){ vDir = normalize(position); gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0); }`,
+  fragmentShader: `uniform vec3 uTop, uBottom, uGlow; uniform float uGlowAmt; varying vec3 vDir;
+    void main(){
+      float h = vDir.y * 0.5 + 0.5;
+      vec3 c = mix(uBottom, uTop, smoothstep(0.25, 0.85, h));
+      float g = pow(max(dot(vDir, normalize(vec3(0.0, 0.05, -1.0))), 0.0), 5.0);
+      c += uGlow * g * uGlowAmt;
+      gl_FragColor = vec4(c, 1.0);
+    }`,
+});
+scene.add(new THREE.Mesh(new THREE.SphereGeometry(40, 48, 24), bgMat));
+
+/* ---------- lights ---------- */
+scene.add(new THREE.HemisphereLight(0xffe8d0, 0x2a0f22, 0.7));
+const keyLight = new THREE.DirectionalLight(0xffe2c0, 2.4);
+keyLight.position.set(3, 4, 5);
+scene.add(keyLight);
+const rimLight = new THREE.DirectionalLight(0xff9a6a, 1.6);
+rimLight.position.set(-4, 2, -3);
+scene.add(rimLight);
+const tubeLight = new THREE.PointLight(0xffb070, 0, 4, 2);
+scene.add(tubeLight);
+const tipLight = new THREE.PointLight(0xff5a6a, 0, 3, 2);
+scene.add(tipLight);
+
+/* ---------- generated textures (no image files) ---------- */
+function radialTexture(stops) {
+  const c = document.createElement('canvas'); c.width = c.height = 128;
+  const g = c.getContext('2d');
+  const gr = g.createRadialGradient(64, 64, 0, 64, 64, 64);
+  stops.forEach(([o, a]) => gr.addColorStop(o, `rgba(255,255,255,${a})`));
+  g.fillStyle = gr; g.fillRect(0, 0, 128, 128);
+  const t = new THREE.CanvasTexture(c); t.colorSpace = THREE.SRGBColorSpace;
+  return t;
+}
+const auraTex = radialTexture([[0, 1], [0.18, 0.65], [0.45, 0.2], [1, 0]]);
+const dotTex = radialTexture([[0, 1], [0.25, 0.85], [0.6, 0.2], [1, 0]]);
+
+function makeAuraSprite(hex, boost) {
+  const m = new THREE.SpriteMaterial({
+    map: auraTex, color: new THREE.Color(hex).multiplyScalar(boost),
+    blending: THREE.AdditiveBlending, transparent: true, depthWrite: false, opacity: 0,
+  });
+  const s = new THREE.Sprite(m);
+  scene.add(s);
+  return s;
+}
+
+function physMat(hex, o = {}) {
+  return new THREE.MeshPhysicalMaterial(Object.assign({
+    color: new THREE.Color(hex), roughness: 0.3, clearcoat: 0.6, clearcoatRoughness: 0.2,
+  }, o));
+}
+
+/* =========================================================
+   The AURA tube (all geometry)
+   ========================================================= */
+const TUBE_BASE = new V(0, -0.2, 0);
+const tube = new THREE.Group();
+scene.add(tube);
+
+// glass body (lathe profile)
+const bodyProfile = [
+  [0.0, -0.82], [0.2, -0.82], [0.29, -0.8], [0.325, -0.76], [0.335, -0.7],
+  [0.335, 0.66], [0.325, 0.72], [0.3, 0.74],
+].map(([x, y]) => new THREE.Vector2(x, y));
+const glass = new THREE.Mesh(
+  new THREE.LatheGeometry(bodyProfile, 64),
+  new THREE.MeshPhysicalMaterial({
+    color: '#FFF6EC', roughness: 0.06, metalness: 0, transparent: true, opacity: 0.1,
+    clearcoat: 1, clearcoatRoughness: 0.05, side: THREE.DoubleSide, depthWrite: false,
+  })
+);
+glass.renderOrder = 2;
+tube.add(glass);
+
+// neck
+const neck = new THREE.Mesh(new THREE.CylinderGeometry(0.24, 0.26, 0.14, 40),
+  physMat('#FFF6EC', { roughness: 0.4, clearcoat: 0.3 }));
+neck.position.y = 0.78;
+tube.add(neck);
+
+// fill layers – five shades stacked (bottom: dark → top: light)
+const FILL_ORDER = [4, 2, 3, 1, 0];       // shade index per layer, bottom to top
+const FILL_BASE = -0.72, FILL_H = 0.268;
+const fillLayers = FILL_ORDER.map((si, k) => {
+  const geo = new THREE.CylinderGeometry(0.27, 0.27, FILL_H, 48);
+  geo.translate(0, FILL_H / 2, 0);
+  const m = new THREE.Mesh(geo, physMat(SHADES[si].hex, {
+    roughness: 0.22, clearcoat: 0.8, emissive: new THREE.Color(SHADES[si].hex), emissiveIntensity: 0.16,
+  }));
+  m.position.y = FILL_BASE + k * FILL_H;
+  m.scale.y = 0.001; m.visible = false;
+  tube.add(m);
+  return m;
+});
+
+// vertical "AURA" label wrapped on the glass (canvas-drawn text)
+const labelCanvas = document.createElement('canvas');
+labelCanvas.width = 256; labelCanvas.height = 768;
+const labelTex = new THREE.CanvasTexture(labelCanvas);
+labelTex.colorSpace = THREE.SRGBColorSpace;
+labelTex.anisotropy = 4;
+function drawLabel() {
+  const g = labelCanvas.getContext('2d');
+  g.clearRect(0, 0, 256, 768);
+  g.save();
+  g.translate(128, 384); g.rotate(-Math.PI / 2);
+  g.textAlign = 'center'; g.textBaseline = 'middle';
+  g.fillStyle = '#FFF0D6';
+  g.font = '300 128px Heebo, sans-serif';
+  if ('letterSpacing' in g) g.letterSpacing = '30px';
+  g.shadowColor = 'rgba(255,200,120,.8)'; g.shadowBlur = 12;
+  g.fillText('AURA', 15, -10);
+  g.shadowBlur = 0;
+  g.font = '400 30px Heebo, sans-serif';
+  if ('letterSpacing' in g) g.letterSpacing = '14px';
+  g.fillStyle = '#E8C27A';
+  g.fillText('LIP TINT', 7, 82);
+  g.restore();
+  labelTex.needsUpdate = true;
+}
+drawLabel();
+document.fonts && document.fonts.load('300 128px Heebo').then(drawLabel).catch(() => {});
+const label = new THREE.Mesh(
+  new THREE.CylinderGeometry(0.339, 0.339, 1.2, 48, 1, true, -0.62, 1.24),
+  new THREE.MeshBasicMaterial({ map: labelTex, transparent: true, depthWrite: false })
+);
+label.position.y = -0.04;
+label.renderOrder = 3;
+tube.add(label);
+
+// soft golden halo behind the tube
+const tubeHalo = makeAuraSprite('#D9A441', 1.4);
+tubeHalo.scale.set(2.6, 3.8, 1);
+
+/* ---------- cap + wand + doe-foot applicator (separate group) ---------- */
+const cap = new THREE.Group();
+scene.add(cap);
+const gold = new THREE.MeshStandardMaterial({ color: '#D9A441', metalness: 1, roughness: 0.26 });
+const capProfile = [
+  [0.348, 0], [0.348, 0.54], [0.335, 0.6], [0.29, 0.635], [0.0, 0.645],
+].map(([x, y]) => new THREE.Vector2(x, y));
+cap.add(new THREE.Mesh(new THREE.LatheGeometry(capProfile, 64), gold));
+const band = new THREE.Mesh(new THREE.CylinderGeometry(0.352, 0.352, 0.05, 64),
+  physMat('#4A1E3A', { roughness: 0.3, clearcoat: 1 }));
+band.position.y = 0.06;
+cap.add(band);
+const wand = new THREE.Mesh(new THREE.CylinderGeometry(0.022, 0.022, 1.28, 12),
+  physMat('#FFF6EC', { roughness: 0.5 }));
+wand.position.y = -0.64;
+cap.add(wand);
+const tipMesh = new THREE.Mesh(new THREE.SphereGeometry(1, 24, 16),
+  physMat('#A3214B', { roughness: 0.15, clearcoat: 1, emissive: new THREE.Color('#A3214B'), emissiveIntensity: 0.25 }));
+tipMesh.scale.set(0.075, 0.15, 0.05);
+tipMesh.position.y = -1.3;
+cap.add(tipMesh);
+const TIP_LOCAL = new V(0, -1.45, 0);   // bottom of the applicator
+const TIP_CLOSED = new V(0, -0.73, 0);  // tip position (tube frame) when capped
+const TIP_LIFTED = new V(0, 0.89, 0);   // after the cap is pulled up
+
+/* =========================================================
+   The five foods (all geometry)
+   ========================================================= */
+function makeHoney() {
+  const g = new THREE.Group();
+  const pts = [];
+  for (let k = 0; k <= 48; k++) {
+    const a = Math.PI * (1 - k / 48);
+    pts.push(new THREE.Vector2(Math.max(Math.sin(a) * (1 - Math.cos(a)) * 0.5, 0.0001), Math.cos(a)));
+  }
+  const drop = new THREE.Mesh(new THREE.LatheGeometry(pts, 48), physMat('#E8A33D', {
+    roughness: 0.05, clearcoat: 1, clearcoatRoughness: 0.03,
+    emissive: new THREE.Color('#E8A33D'), emissiveIntensity: 0.35,
+  }));
+  drop.scale.setScalar(0.44);
+  g.add(drop);
+  const mini = drop.clone(); mini.scale.setScalar(0.16); mini.position.set(0.32, -0.42, 0.1);
+  g.add(mini);
+  return g;
+}
+
+function makePeach() {
+  const g = new THREE.Group();
+  const geo = new THREE.SphereGeometry(0.42, 64, 40);
+  const pos = geo.attributes.position, n = new V(), colors = [];
+  const base = new THREE.Color('#F4A582'), blush = new THREE.Color('#E0644E'), c = new THREE.Color();
+  for (let i = 0; i < pos.count; i++) {
+    n.fromBufferAttribute(pos, i).normalize();
+    let f = 1 - 0.09 * Math.exp(-(n.x * n.x) / 0.006) * (1 - Math.pow(Math.abs(n.y), 4)); // the crease
+    if (n.y > 0.85) f -= 0.12 * (n.y - 0.85) / 0.15;                                          // top dimple
+    pos.setXYZ(i, n.x * 0.42 * f, n.y * 0.42 * f, n.z * 0.42 * f);
+    c.copy(base).lerp(blush, smooth(clamp01((n.z * 0.7 + n.x * 0.4 + 0.1) * 0.9)));
+    colors.push(c.r, c.g, c.b);
+  }
+  geo.setAttribute('color', new THREE.Float32BufferAttribute(colors, 3));
+  geo.computeVertexNormals();
+  g.add(new THREE.Mesh(geo, new THREE.MeshPhysicalMaterial({
+    vertexColors: true, roughness: 0.55, sheen: 1, sheenColor: new THREE.Color('#FFD7BE'), sheenRoughness: 0.5,
+  })));
+  const leaf = new THREE.Mesh(new THREE.SphereGeometry(1, 20, 10), physMat('#5E8C46', { roughness: 0.45 }));
+  leaf.scale.set(0.2, 0.03, 0.09); leaf.position.set(0.14, 0.42, 0.02); leaf.rotation.z = -0.45;
+  g.add(leaf);
+  const stem = new THREE.Mesh(new THREE.CylinderGeometry(0.016, 0.022, 0.12, 8), physMat('#5A3A26', { roughness: 0.7 }));
+  stem.position.y = 0.42;
+  g.add(stem);
+  return g;
+}
+
+function makeBerries() {
+  const g = new THREE.Group();
+  const rasp = new THREE.Group();
+  rasp.add(new THREE.Mesh(new THREE.SphereGeometry(0.25, 24, 16), physMat('#6E1530')));
+  const N = 54, dummy = new THREE.Object3D(), list = [];
+  for (let i = 0; i < N; i++) {
+    const y = 1 - (i + 0.5) / N * 2, r = Math.sqrt(1 - y * y), th = i * 2.39996;
+    if (y > 0.82) continue;
+    list.push(new V(Math.cos(th) * r, y, Math.sin(th) * r));
+  }
+  const inst = new THREE.InstancedMesh(new THREE.SphereGeometry(0.078, 14, 10),
+    physMat('#A3214B', { roughness: 0.18, clearcoat: 1, emissive: new THREE.Color('#A3214B'), emissiveIntensity: 0.18 }), list.length);
+  list.forEach((p, i) => { dummy.position.copy(p).multiplyScalar(0.27); dummy.updateMatrix(); inst.setMatrixAt(i, dummy.matrix); });
+  rasp.add(inst);
+  for (let k = 0; k < 5; k++) {                       // little green calyx
+    const s = new THREE.Mesh(new THREE.SphereGeometry(1, 10, 6), physMat('#557A3C', { roughness: 0.5 }));
+    s.scale.set(0.09, 0.015, 0.035);
+    const a = k / 5 * Math.PI * 2;
+    s.position.set(Math.cos(a) * 0.08, 0.29, Math.sin(a) * 0.08);
+    s.rotation.y = -a;
+    rasp.add(s);
+  }
+  rasp.scale.set(1, 1.12, 1);
+  g.add(rasp);
+  [[0.34, -0.24, 0.14, 0.15], [-0.31, -0.27, -0.02, 0.13]].forEach(([x, y, z, r]) => {
+    const b = new THREE.Mesh(new THREE.SphereGeometry(r, 24, 16), new THREE.MeshPhysicalMaterial({
+      color: '#3A2752', roughness: 0.38, sheen: 1, sheenColor: new THREE.Color('#9C8FC4'), sheenRoughness: 0.6,
+    }));
+    b.position.set(x, y, z);
+    g.add(b);
+  });
+  return g;
+}
+
+function makePomegranate() {
+  const g = new THREE.Group();
+  const geo = new THREE.SphereGeometry(0.42, 56, 36);
+  const pos = geo.attributes.position, colors = [];
+  const a = new THREE.Color('#C0283A'), b = new THREE.Color('#82182A'), c = new THREE.Color();
+  for (let i = 0; i < pos.count; i++) {
+    const x = pos.getX(i), y = pos.getY(i), z = pos.getZ(i);
+    const nse = 0.5 + 0.5 * Math.sin(x * 11 + Math.sin(y * 9)) * Math.cos(z * 10 + y * 4);
+    c.copy(a).lerp(b, nse * 0.55 + (y < -0.3 ? 0.2 : 0));
+    colors.push(c.r, c.g, c.b);
+  }
+  geo.setAttribute('color', new THREE.Float32BufferAttribute(colors, 3));
+  const body = new THREE.Mesh(geo, new THREE.MeshPhysicalMaterial({ vertexColors: true, roughness: 0.32, clearcoat: 0.8, clearcoatRoughness: 0.25 }));
+  body.scale.y = 0.92;
+  g.add(body);
+  const crownMat = physMat('#8E1C2C', { roughness: 0.5 });
+  const crown = new THREE.Mesh(new THREE.CylinderGeometry(0.09, 0.12, 0.13, 12, 1, true), crownMat);
+  crown.position.y = 0.42;
+  g.add(crown);
+  for (let k = 0; k < 6; k++) {
+    const t = new THREE.Mesh(new THREE.ConeGeometry(0.035, 0.1, 6), crownMat);
+    const an = k / 6 * Math.PI * 2;
+    t.position.set(Math.cos(an) * 0.09, 0.51, Math.sin(an) * 0.09);
+    t.rotation.set(Math.sin(an) * 0.5, 0, -Math.cos(an) * 0.5);
+    g.add(t);
+  }
+  const arils = new THREE.Group();                 // juicy seeds orbiting the fruit
+  const arilMat = physMat('#E2304A', { roughness: 0.04, clearcoat: 1, emissive: new THREE.Color('#C0283A'), emissiveIntensity: 0.45 });
+  for (let k = 0; k < 7; k++) {
+    const s = new THREE.Mesh(new THREE.SphereGeometry(1, 16, 12), arilMat);
+    s.scale.set(0.05, 0.068, 0.05);
+    const an = k / 7 * Math.PI * 2;
+    s.position.set(Math.cos(an) * 0.68, Math.sin(an * 2) * 0.12, Math.sin(an) * 0.68);
+    s.rotation.z = an;
+    arils.add(s);
+  }
+  arils.rotation.x = 0.35;
+  g.add(arils);
+  g.userData.arils = arils;
+  return g;
+}
+
+function makeCocoa() {
+  const g = new THREE.Group();
+  const bean = (s, x, y, z, rz) => {
+    const b = new THREE.Group();
+    b.add(new THREE.Mesh(new THREE.SphereGeometry(1, 40, 24), physMat('#7A4A3A', { roughness: 0.45, clearcoat: 0.4 })));
+    b.children[0].scale.set(0.25, 0.43, 0.2);
+    const seamGeo = new THREE.TorusGeometry(1, 0.035, 8, 72);
+    seamGeo.rotateY(Math.PI / 2);
+    seamGeo.scale(1, 0.43, 0.205);
+    b.add(new THREE.Mesh(seamGeo, physMat('#4E2C22', { roughness: 0.6 })));
+    b.scale.setScalar(s); b.position.set(x, y, z); b.rotation.z = rz;
+    g.add(b);
+  };
+  bean(1, 0, 0, 0, 0.55);
+  bean(0.62, 0.34, -0.2, -0.12, -0.4);
+  return g;
+}
+
+const FOOD = [makeHoney(), makePeach(), makeBerries(), makePomegranate(), makeCocoa()].map((grp, i) => {
+  scene.add(grp);
+  grp.visible = false;
+  const p0 = [
+    new V(-2.3, 1.15, 0.2),   // honey
+    new V(2.3, 1.1, 0.1),     // peach
+    new V(-2.5, -0.85, 0.6),  // berries
+    new V(2.5, -0.9, 0.6),    // pomegranate
+    new V(0.0, 2.05, -1.6),   // cocoa
+  ][i];
+  const tIn = 3.1 + i * 0.95;
+  const layer = FILL_ORDER.indexOf(i);
+  return {
+    grp, p0, tIn, tBloom: tIn + 0.8, layer,
+    tEnd: 10.3 + layer * 0.6,
+    pStart: p0.clone().multiplyScalar(2.4).add(new V(0, 0.3, -5)),
+    target: TUBE_BASE.clone().add(new V(0, FILL_BASE + (layer + 0.5) * FILL_H, 0)),
+    inner: makeAuraSprite(SHADES[i].hex, SHADES[i].boost),
+    outer: makeAuraSprite(SHADES[i].hex, SHADES[i].boost * 0.7),
+  };
+});
+const SWIRL_START = 8.2;
+
+/* Pure position function for food i at time tt (used for the object and its trail) */
+function foodPos(f, i, tt, out) {
+  if (tt < f.tIn) return out.copy(f.pStart);
+  if (tt < f.tIn + 1.1) return out.lerpVectors(f.pStart, f.p0, easeOutCubic(seg(tt, f.tIn, f.tIn + 1.1)));
+  if (tt < SWIRL_START) {
+    out.copy(f.p0);
+    out.y += 0.08 * Math.sin(tt * 1.3 + i * 1.7) * seg(tt, f.tIn + 1.1, f.tIn + 1.8) * (1 - seg(tt, 7.6, SWIRL_START));
+    return out;
+  }
+  const s = seg(tt, SWIRL_START, f.tEnd), e = easeInOutCubic(s);
+  const th = 2.4 * Math.PI * Math.pow(s, 1.4);
+  const dx = f.p0.x - f.target.x, dy = f.p0.y - f.target.y, dz = f.p0.z - f.target.z;
+  const c = Math.cos(th), sn = Math.sin(th), k = 1 - e;
+  return out.set(f.target.x + (dx * c - dz * sn) * k, f.target.y + dy * k, f.target.z + (dx * sn + dz * c) * k);
+}
+
+/* ---------- shade labels (HTML, projected) ---------- */
+const labelsLayer = document.getElementById('labels');
+FOOD.forEach((f, i) => {
+  const el = document.createElement('div');
+  el.className = 'shade-label';
+  el.dir = 'ltr';
+  el.innerHTML = `<i style="background:${SHADES[i].hex};color:${SHADES[i].hex}"></i>${SHADES[i].name}`;
+  labelsLayer.appendChild(el);
+  f.labelEl = el;
+});
+
+/* =========================================================
+   Particles: dust, swirl trails, sparkles
+   ========================================================= */
+function makePoints(n, size) {
+  const geo = new THREE.BufferGeometry();
+  geo.setAttribute('position', new THREE.BufferAttribute(new Float32Array(n * 3), 3));
+  geo.setAttribute('color', new THREE.BufferAttribute(new Float32Array(n * 3), 3));
+  const p = new THREE.Points(geo, new THREE.PointsMaterial({
+    size, map: dotTex, vertexColors: true, transparent: true, depthWrite: false,
+    blending: THREE.AdditiveBlending, sizeAttenuation: true,
+  }));
+  p.frustumCulled = false;
+  scene.add(p);
+  return p;
+}
+
+// warm floating dust
+const DUST_N = 260;
+const dust = makePoints(DUST_N, 0.05);
+const dustSeed = Array.from({ length: DUST_N }, () => ({
+  x: (Math.random() - 0.5) * 16, y: (Math.random() - 0.5) * 9, z: -7 + Math.random() * 8,
+  sp: 0.05 + Math.random() * 0.12, ph: Math.random() * 6.28,
+}));
+const dustCol = new THREE.Color('#E8B060');
+
+// swirl trails
+const TRAIL_K = 42;
+const trails = makePoints(FOOD.length * TRAIL_K, 0.13);
+const shadeCols = SHADES.map(s => new THREE.Color(s.hex).multiplyScalar(s.boost));
+
+// tint line (gradient through all five shades)
+const lineCurve = new THREE.CatmullRomCurve3([
+  TIP_LIFTED.clone(), new V(0.45, 1.5, 0.35), new V(1.25, 1.55, 0.55),
+  new V(1.9, 0.85, 0.55), new V(2.6, 0.75, 0.4), new V(3.1, 1.35, 0.2),
+], false, 'catmullrom', 0.5);
+const LINE_SEG = 220, LINE_RAD = 16;
+const lineGeo = new THREE.TubeGeometry(lineCurve, LINE_SEG, 0.075, LINE_RAD, false);
+{
+  const grad = [4, 2, 3, 1, 0].map(i => new THREE.Color(SHADES[i].hex));
+  const cols = [], c = new THREE.Color();
+  for (let i = 0; i <= LINE_SEG; i++) {
+    const u = i / LINE_SEG * (grad.length - 1), k = Math.min(Math.floor(u), grad.length - 2);
+    c.copy(grad[k]).lerp(grad[k + 1], u - k);
+    for (let j = 0; j <= LINE_RAD; j++) cols.push(c.r, c.g, c.b);
+  }
+  lineGeo.setAttribute('color', new THREE.Float32BufferAttribute(cols, 3));
+}
+const lineMat = new THREE.MeshPhysicalMaterial({
+  vertexColors: true, roughness: 0.15, clearcoat: 1, clearcoatRoughness: 0.05,
+  emissive: new THREE.Color('#3a0a14'), transparent: true, opacity: 1,
+});
+const line = new THREE.Mesh(lineGeo, lineMat);
+line.geometry.setDrawRange(0, 0);
+scene.add(line);
+const DRAW_A = 13.85, DRAW_B = 15.9;
+const drawProg = t => { const s = seg(t, DRAW_A, DRAW_B); return 0.5 * s + 0.5 * smooth(s); };
+const drawTimeOf = u => { // invert drawProg numerically
+  let lo = DRAW_A, hi = DRAW_B;
+  for (let k = 0; k < 30; k++) { const m = (lo + hi) / 2; if (drawProg(m) < u) lo = m; else hi = m; }
+  return lo;
+};
+
+// sparkles that peel off the drawn line
+const SPARK_N = 170;
+const sparks = makePoints(SPARK_N, 0.1);
+const sparkSeed = Array.from({ length: SPARK_N }, () => {
+  const u = Math.random();
+  return {
+    u, t0: drawTimeOf(u), p: lineCurve.getPointAt(u),
+    off: new V(Math.random() - 0.5, Math.random() - 0.3, Math.random() - 0.5).normalize(),
+    ph: Math.random() * 6.28, sp: 0.6 + Math.random() * 0.8,
+  };
+});
+const sparkCol = new THREE.Color('#FFE2B0');
+
+// finale: five small auras orbiting the tube
+const ring = new THREE.Group();
+scene.add(ring);
+const ringSprites = SHADES.map((s, i) => {
+  const sp = makeAuraSprite(s.hex, s.boost * 1.2);
+  scene.remove(sp); ring.add(sp);
+  return sp;
+});
+
+/* =========================================================
+   Camera script
+   ========================================================= */
+const CAM = [
+  [0,    [0, 0.4, 9.0],   [0, 0.1, 0]],
+  [3,    [0, 0.3, 7.2],   [0, 0.1, 0]],
+  [8,    [0, 0.35, 7.8],  [0, 0.15, 0]],
+  [12.8, [0, 0.25, 5.2],  [0, 0.05, 0]],
+  [14.0, [0.9, 1.0, 7.6], [1.25, 1.05, 0]],
+  [16.0, [1.2, 1.0, 7.8], [1.4, 1.1, 0]],
+  [17.6, [0, 0.3, 8.0],   [0, 0.3, 0]],
+  [99,   [0, 0.25, 7.7],  [0, 0.3, 0]],
+].map(([t, p, l]) => ({ t, p: new V(...p), l: new V(...l) }));
+const camPos = new V(), camLook = new V();
+function scriptCamera(t, wall) {
+  let k = 0;
+  while (k < CAM.length - 2 && t >= CAM[k + 1].t) k++;
+  const a = CAM[k], b = CAM[k + 1];
+  const e = easeInOutCubic(seg(t, a.t, b.t));
+  camPos.lerpVectors(a.p, b.p, e);
+  camLook.lerpVectors(a.l, b.l, e);
+  const aspectFix = Math.max(1, 1.7 / camera.aspect);   // keep everything in frame in narrow iframes
+  camPos.sub(camLook).multiplyScalar(aspectFix).add(camLook);
+  camPos.x += 0.05 * Math.sin(wall * 0.7);
+  camPos.y += 0.035 * Math.sin(wall * 0.9);
+  camera.position.copy(camPos);
+  camera.lookAt(camLook);
+}
+
+/* =========================================================
+   Per-frame update (everything is a pure function of t)
+   ========================================================= */
+const tmp = new V(), tmp2 = new V(), proj = new V();
+const captions = [...document.querySelectorAll('.caption')].map(el => ({ el, from: +el.dataset.from, to: +el.dataset.to }));
+const logoEl = document.getElementById('logo');
+const sloganEl = document.getElementById('slogan');
+const progressEl = document.querySelector('#progress i');
+
+function update(t, wall) {
+  /* --- tube --- */
+  const appear = seg(t, 0.3, 2.2);
+  const s = Math.max(0.001, easeOutBack(appear));
+  tube.scale.setScalar(s);
+  tube.position.copy(TUBE_BASE);
+  tube.position.y += -0.6 * (1 - easeOutCubic(seg(t, 0.2, 2.4))) + 0.04 * Math.sin(t * 1.1);
+  tube.rotation.y = -Math.PI * 1.5 * (1 - easeOutCubic(seg(t, 0, 3))) + 0.3 * Math.sin(t * 0.5);
+  tube.visible = t > 0.25;
+
+  /* --- fill layers --- */
+  let fillTotal = 0;
+  FOOD.forEach(f => {
+    const p = easeOutCubic(seg(t, f.tEnd - 0.35, f.tEnd + 0.3));
+    const m = fillLayers[f.layer];
+    m.visible = p > 0.001;
+    m.scale.y = Math.max(0.001, p);
+    fillTotal += p / FOOD.length;
+  });
+  const fullFlash = pulse(t, 12.85, 0.3);
+  tubeLight.position.copy(tube.position).add(tmp.set(0, 0.2, 1.4));
+  tubeLight.intensity = fillTotal * 0.6 + fullFlash * 3;
+  tubeHalo.position.copy(tube.position).add(tmp.set(0, 0.25, -0.4));
+  const ringA = easeOutCubic(seg(t, 16.6, 17.6));
+  tubeHalo.material.opacity = (0.12 * appear + fillTotal * 0.12 + fullFlash * 0.35 + ringA * 0.1) * (1 + 0.06 * Math.sin(wall * 2));
+  bgMat.uniforms.uGlowAmt.value = 0.35 + fillTotal * 0.35 + ringA * 0.3;
+
+  /* --- foods, auras, labels, trails --- */
+  const tPos = trails.geometry.attributes.position, tCol = trails.geometry.attributes.color;
+  FOOD.forEach((f, i) => {
+    const alive = t >= f.tIn && t < f.tEnd;
+    f.grp.visible = alive;
+    foodPos(f, i, t, f.grp.position);
+    const sw = seg(t, SWIRL_START, f.tEnd);
+    const scl = (0.4 + 0.6 * easeOutCubic(seg(t, f.tIn, f.tIn + 1.1))) * (1 - smooth(seg(sw, 0.55, 1)));
+    f.grp.scale.setScalar(Math.max(0.001, scl));
+    f.grp.rotation.y = wall * 0.5 + i + (1 - easeOutCubic(seg(t, f.tIn, f.tIn + 1.1))) * 3;
+    f.grp.rotation.x = 0.15 * Math.sin(wall * 0.6 + i);
+    if (f.grp.userData.arils) f.grp.userData.arils.rotation.y = wall * 0.8;
+
+    const bloomE = easeOutBack(seg(t, f.tBloom, f.tBloom + 0.55));
+    const bloomA = seg(t, f.tBloom, f.tBloom + 0.3);
+    const pre = 0.18 * seg(t, f.tIn + 0.2, f.tIn + 0.8);
+    const fade = 1 - smooth(seg(sw, 0.82, 1));
+    const shrink = 1 - 0.6 * sw;
+    const pul = 1 + 0.08 * Math.sin(wall * 3 + i);
+    f.inner.position.copy(f.grp.position);
+    f.outer.position.copy(f.grp.position).add(tmp.set(0, 0, -0.2));
+    f.inner.scale.setScalar(Math.max(0.001, (0.6 + 0.9 * bloomE) * shrink));
+    f.outer.scale.setScalar(Math.max(0.001, (0.8 + 1.9 * bloomE) * shrink * pul));
+    f.inner.material.opacity = alive ? Math.max(pre, 0.9 * bloomA) * fade : 0;
+    f.outer.material.opacity = alive ? Math.max(pre * 0.5, 0.45 * bloomA) * fade : 0;
+
+    // label under the food
+    const lo = seg(t, f.tBloom + 0.1, f.tBloom + 0.5) * (1 - seg(t, 7.9, 8.3));
+    f.labelEl.style.opacity = lo.toFixed(3);
+    if (lo > 0) {
+      const above = i === 4;   // cocoa floats above the tube: its label goes on top
+      proj.copy(f.grp.position); proj.y += above ? 0.62 : -0.68; proj.project(camera);
+      const x = (proj.x * 0.5 + 0.5) * innerWidth, y = (-proj.y * 0.5 + 0.5) * innerHeight;
+      f.labelEl.style.transform = `translate(${x.toFixed(1)}px, ${y.toFixed(1)}px) translate(-50%, ${above ? '-100%' : '0'})`;
+    }
+
+    // swirl trail
+    const trailOn = t >= SWIRL_START && t < f.tEnd + 0.4;
+    for (let k = 0; k < TRAIL_K; k++) {
+      const idx = i * TRAIL_K + k;
+      const tt = Math.max(SWIRL_START, t - k * 0.03);
+      foodPos(f, i, Math.min(tt, f.tEnd), tmp2);
+      tPos.setXYZ(idx, tmp2.x, tmp2.y, tmp2.z);
+      const inten = trailOn ? Math.pow(1 - k / TRAIL_K, 1.6) * seg(t, SWIRL_START, SWIRL_START + 0.4) * (1 - seg(t, f.tEnd, f.tEnd + 0.4)) : 0;
+      tCol.setXYZ(idx, shadeCols[i].r * inten, shadeCols[i].g * inten, shadeCols[i].b * inten);
+    }
+  });
+  tPos.needsUpdate = true; tCol.needsUpdate = true;
+
+  /* --- cap, wand and the tint line --- */
+  line.position.copy(tube.position);
+  const prog = drawProg(t);
+  line.geometry.setDrawRange(0, Math.floor(prog * LINE_SEG) * LINE_RAD * 6);
+  lineMat.opacity = 1 - seg(t, 16.2, 17.0);
+  line.visible = prog > 0 && lineMat.opacity > 0.01;
+
+  if (t < 13.0 || t >= 17.2) {
+    cap.position.copy(tube.position).add(tmp.set(0, 0.72 * s, 0));
+    cap.rotation.set(0, tube.rotation.y, 0);
+    cap.scale.setScalar(s);
+    tipLight.intensity = 0;
+  } else {
+    const tip = tmp2;
+    let tilt = 0;
+    if (t < DRAW_A) {
+      tip.lerpVectors(TIP_CLOSED, TIP_LIFTED, easeInOutCubic(seg(t, 13.0, DRAW_A)));
+    } else if (t < 16.0) {
+      lineCurve.getPointAt(prog, tip);
+      tilt = 0.4 * smooth(seg(t, DRAW_A, DRAW_A + 0.5));
+    } else if (t < 16.7) {
+      const e = easeInOutCubic(seg(t, 16.0, 16.7));
+      lineCurve.getPointAt(1, tip).lerp(TIP_LIFTED, e);
+      tip.y += Math.sin(e * Math.PI) * 0.4;
+      tilt = 0.4 * (1 - e);
+    } else {
+      tip.lerpVectors(TIP_LIFTED, TIP_CLOSED, easeInOutCubic(seg(t, 16.7, 17.2)));
+    }
+    cap.scale.setScalar(1);
+    cap.rotation.set(0, tube.rotation.y, tilt);
+    const off = tmp.copy(TIP_LOCAL).applyEuler(cap.rotation);
+    cap.position.copy(tube.position).add(tip).sub(off);
+    tipLight.position.copy(tube.position).add(tip).add(tmp.set(0, 0, 0.3));
+    tipLight.intensity = 2.5 * seg(t, DRAW_A, DRAW_A + 0.3) * (1 - seg(t, 15.9, 16.3));
+  }
+
+  // sparkles
+  const sPos = sparks.geometry.attributes.position, sCol = sparks.geometry.attributes.color;
+  const sparkFade = 1 - seg(t, 16.3, 17.2);
+  sparkSeed.forEach((p, k) => {
+    const since = t - p.t0;
+    if (since < 0 || sparkFade <= 0) { sCol.setXYZ(k, 0, 0, 0); return; }
+    const d = 0.08 + since * 0.35 * p.sp;
+    sPos.setXYZ(k,
+      tube.position.x + p.p.x + p.off.x * d,
+      tube.position.y + p.p.y + p.off.y * d + since * 0.12,
+      tube.position.z + p.p.z + p.off.z * d);
+    const tw = 0.55 + 0.45 * Math.sin(wall * 14 * p.sp + p.ph);
+    const inten = (1.6 * Math.exp(-since * 0.9)) * tw * sparkFade;
+    sCol.setXYZ(k, sparkCol.r * inten, sparkCol.g * inten, sparkCol.b * inten);
+  });
+  sPos.needsUpdate = true; sCol.needsUpdate = true;
+
+  /* --- finale ring of auras --- */
+  ring.position.copy(tube.position).add(tmp.set(0, 0.25, 0));
+  ring.rotation.set(0.35, wall * 0.8, -0.12);
+  ringSprites.forEach((sp, i) => {
+    const a = i / 5 * Math.PI * 2, r = 1.25 * (0.55 + 0.45 * ringA);
+    sp.position.set(Math.cos(a) * r, 0.1 * Math.sin(wall * 2 + i), Math.sin(a) * r);
+    sp.scale.setScalar(Math.max(0.001, 0.6 * ringA * (1 + 0.1 * Math.sin(wall * 3 + i))));
+    sp.material.opacity = 0.95 * ringA;
+  });
+
+  /* --- dust --- */
+  const dPos = dust.geometry.attributes.position, dCol = dust.geometry.attributes.color;
+  dustSeed.forEach((d, k) => {
+    const y = ((d.y + wall * d.sp + 4.5) % 9 + 9) % 9 - 4.5;
+    dPos.setXYZ(k, d.x + 0.25 * Math.sin(wall * 0.2 + d.ph), y, d.z);
+    const inten = 0.28 + 0.22 * Math.sin(wall * 1.3 + d.ph);
+    dCol.setXYZ(k, dustCol.r * inten, dustCol.g * inten, dustCol.b * inten);
+  });
+  dPos.needsUpdate = true; dCol.needsUpdate = true;
+
+  /* --- HTML overlay --- */
+  captions.forEach(c => c.el.classList.toggle('show', t >= c.from && t < c.to));
+  logoEl.classList.toggle('show', t >= 16.6);
+  sloganEl.classList.toggle('show', t >= 17.1);
+  progressEl.style.width = (clamp01(t / DURATION) * 100).toFixed(2) + '%';
+}
+
+/* =========================================================
+   Sound design – Web Audio API only (no audio files)
+   ========================================================= */
+let actx = null, master, reverbIn, noiseBuf;
+
+function initAudio() {
+  if (actx) return;
+  const AC = window.AudioContext || window.webkitAudioContext;
+  if (!AC) return;
+  actx = new AC();
+  const comp = actx.createDynamicsCompressor();
+  comp.threshold.value = -16; comp.ratio.value = 3;
+  master = actx.createGain(); master.gain.value = 0.9;
+  master.connect(comp); comp.connect(actx.destination);
+  // synthesized reverb (decaying noise impulse)
+  const len = actx.sampleRate * 2.8, ir = actx.createBuffer(2, len, actx.sampleRate);
+  for (let ch = 0; ch < 2; ch++) {
+    const d = ir.getChannelData(ch);
+    for (let i = 0; i < len; i++) d[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / len, 2.6);
+  }
+  const conv = actx.createConvolver(); conv.buffer = ir;
+  reverbIn = actx.createGain(); reverbIn.gain.value = 0.4;
+  reverbIn.connect(conv); conv.connect(master);
+  noiseBuf = actx.createBuffer(1, actx.sampleRate * 2, actx.sampleRate);
+  const nd = noiseBuf.getChannelData(0);
+  for (let i = 0; i < nd.length; i++) nd[i] = Math.random() * 2 - 1;
+}
+
+function out(node, wet = 0.3, pan = 0) {
+  const p = actx.createStereoPanner(); p.pan.value = pan;
+  node.connect(p); p.connect(master);
+  if (wet > 0) { const s = actx.createGain(); s.gain.value = wet; p.connect(s); s.connect(reverbIn); }
+  return p;
+}
+function osc(type, freq, t0, t1, dest) {
+  const o = actx.createOscillator(); o.type = type; o.frequency.value = freq;
+  o.connect(dest); o.start(t0); o.stop(t1);
+  return o;
+}
+
+// soft pad (opening / closing)
+function pad(t0, freqs, dur, vol, att = 1.2, rel = 1.5) {
+  const g = actx.createGain();
+  g.gain.setValueAtTime(0, t0);
+  g.gain.linearRampToValueAtTime(vol, t0 + att);
+  g.gain.setValueAtTime(vol, t0 + dur - rel);
+  g.gain.linearRampToValueAtTime(0, t0 + dur);
+  const lp = actx.createBiquadFilter(); lp.type = 'lowpass';
+  lp.frequency.setValueAtTime(350, t0);
+  lp.frequency.linearRampToValueAtTime(1500, t0 + att + 0.6);
+  lp.connect(g); out(g, 0.5);
+  freqs.forEach(f => [-7, 7].forEach(dt => { osc('triangle', f, t0, t0 + dur + 0.1, lp).detune.value = dt; }));
+}
+
+// gentle bell (one per food)
+function chime(t0, f, pan = 0, vol = 1) {
+  [[1, 1], [2.01, 0.45], [3.0, 0.2], [4.17, 0.12], [5.43, 0.07]].forEach(([m, a]) => {
+    const g = actx.createGain();
+    const dec = 2.4 / (m * 0.6 + 0.4);
+    g.gain.setValueAtTime(0.0001, t0);
+    g.gain.exponentialRampToValueAtTime(0.16 * a * vol, t0 + 0.006);
+    g.gain.exponentialRampToValueAtTime(0.0001, t0 + dec);
+    osc('sine', f * m, t0, t0 + dec + 0.05, g);
+    out(g, 0.5, pan);
+  });
+}
+
+// swirling whoosh (filtered noise, sweeping filter and pan)
+function whoosh(t0, dur) {
+  const src = actx.createBufferSource(); src.buffer = noiseBuf; src.loop = true;
+  const bp = actx.createBiquadFilter(); bp.type = 'bandpass'; bp.Q.value = 1.3;
+  bp.frequency.setValueAtTime(220, t0);
+  bp.frequency.exponentialRampToValueAtTime(2400, t0 + dur * 0.6);
+  bp.frequency.exponentialRampToValueAtTime(450, t0 + dur);
+  const g = actx.createGain();
+  g.gain.setValueAtTime(0, t0);
+  g.gain.linearRampToValueAtTime(0.42, t0 + dur * 0.55);
+  g.gain.linearRampToValueAtTime(0, t0 + dur);
+  const p = actx.createStereoPanner();
+  const curve = new Float32Array(96);
+  for (let i = 0; i < curve.length; i++) curve[i] = 0.8 * Math.sin(i / (curve.length - 1) * Math.PI * 2 * 3.5);
+  p.pan.setValueCurveAtTime(curve, t0, dur);
+  src.connect(bp); bp.connect(g); g.connect(p); p.connect(master);
+  const s = actx.createGain(); s.gain.value = 0.35; p.connect(s); s.connect(reverbIn);
+  src.start(t0); src.stop(t0 + dur + 0.05);
+}
+
+// "plop" when an aura drops into the tube
+function plop(t0, f, vol = 0.22) {
+  const o = actx.createOscillator(); o.type = 'sine';
+  o.frequency.setValueAtTime(f * 2.4, t0);
+  o.frequency.exponentialRampToValueAtTime(f, t0 + 0.09);
+  const g = actx.createGain();
+  g.gain.setValueAtTime(0.0001, t0);
+  g.gain.exponentialRampToValueAtTime(vol, t0 + 0.005);
+  g.gain.exponentialRampToValueAtTime(0.0001, t0 + 0.3);
+  o.connect(g); out(g, 0.3);
+  o.start(t0); o.stop(t0 + 0.35);
+}
+
+// cap pop: short tonal pop + click of noise
+function pop(t0) {
+  plop(t0, 420, 0.25);
+  const src = actx.createBufferSource(); src.buffer = noiseBuf;
+  const hp = actx.createBiquadFilter(); hp.type = 'highpass'; hp.frequency.value = 3000;
+  const g = actx.createGain();
+  g.gain.setValueAtTime(0.18, t0); g.gain.exponentialRampToValueAtTime(0.0001, t0 + 0.04);
+  src.connect(hp); hp.connect(g); out(g, 0.2);
+  src.start(t0); src.stop(t0 + 0.06);
+}
+
+// sparkle: many tiny high pings + a rising shimmer
+function sparkle(t0, dur, n) {
+  for (let k = 0; k < n; k++) {
+    const tt = t0 + Math.pow(Math.random(), 0.8) * dur;
+    const f = 2600 + Math.random() * 4200;
+    const g = actx.createGain();
+    const dec = 0.12 + Math.random() * 0.3;
+    g.gain.setValueAtTime(0.0001, tt);
+    g.gain.exponentialRampToValueAtTime(0.035 + Math.random() * 0.045, tt + 0.003);
+    g.gain.exponentialRampToValueAtTime(0.0001, tt + dec);
+    osc('sine', f, tt, tt + dec + 0.02, g);
+    out(g, 0.6, Math.random() * 1.6 - 0.8);
+  }
+  const g = actx.createGain();
+  g.gain.setValueAtTime(0, t0); g.gain.linearRampToValueAtTime(0.025, t0 + dur * 0.5); g.gain.linearRampToValueAtTime(0, t0 + dur);
+  const o = osc('triangle', 1200, t0, t0 + dur + 0.05, g);
+  o.frequency.setValueAtTime(1200, t0); o.frequency.exponentialRampToValueAtTime(3200, t0 + dur);
+  out(g, 0.6);
+}
+
+// low warm drone under the whole film
+function drone(t0, dur) {
+  const g = actx.createGain();
+  g.gain.setValueAtTime(0, t0); g.gain.linearRampToValueAtTime(0.05, t0 + 2.5);
+  g.gain.setValueAtTime(0.05, t0 + dur - 3); g.gain.linearRampToValueAtTime(0, t0 + dur);
+  const lp = actx.createBiquadFilter(); lp.type = 'lowpass'; lp.frequency.value = 500;
+  lp.connect(g); out(g, 0.2);
+  osc('sine', 73.42, t0, t0 + dur, lp);
+  osc('triangle', 110, t0, t0 + dur, lp);
+}
+
+function scheduleSound(b) {
+  const D = [146.83, 220.0], NOTES = [587.33, 659.25, 739.99, 880.0, 987.77];
+  drone(b, 20.5);
+  pad(b + 0.05, D, 3.8, 0.045);                                // 0 s: soft opening tone
+  chime(b + 1.3, 440, 0, 0.5);
+  FOOD.forEach((f, i) => chime(b + f.tBloom, NOTES[i], f.p0.x / 3.2)); // 3–8 s: chime per food
+  whoosh(b + SWIRL_START, 4.7);                                // 8–13 s: whoosh
+  FOOD.forEach(f => plop(b + f.tEnd, 180 * Math.pow(1.13, f.layer)));
+  chime(b + 12.85, 1174.66, 0, 0.55);
+  pop(b + 13.05);                                              // 13 s: cap opens
+  sparkle(b + 13.9, 2.2, 38);                                  // 13–16 s: sparkle
+  pad(b + 16.35, [146.83, 220.0, 293.66, 369.99], 4.2, 0.04, 0.6, 1.8); // 16 s: closing
+  chime(b + 16.45, 1174.66, -0.2, 0.7);
+  chime(b + 16.85, 880, 0.2, 0.6);
+  chime(b + 17.3, 587.33, 0, 0.6);
+}
+
+/* =========================================================
+   Playback state
+   ========================================================= */
+const intro = document.getElementById('intro');
+const endControls = document.getElementById('endControls');
+const orbitBtn = document.getElementById('orbitBtn');
+const orbitHint = document.getElementById('orbitHint');
+const progressBar = document.getElementById('progress');
+let state = 'idle', startAudio = 0, startPerf = 0, seekT = 0, orbit = false;
+
+function now() { return performance.now() / 1000; }
+function getT() {
+  if (state === 'idle') return 0;
+  if (state === 'seek') return seekT;
+  return actx ? actx.currentTime - startAudio : now() - startPerf;
+}
+
+async function play() {
+  initAudio();
+  if (actx) {
+    if (actx.state !== 'running') await actx.resume().catch(() => {});
+    startAudio = actx.currentTime + 0.12;
+    scheduleSound(startAudio);
+  }
+  startPerf = now() + 0.12;
+  setOrbit(false);
+  intro.classList.add('hide');
+  endControls.classList.remove('show');
+  progressBar.style.opacity = 1;
+  state = 'playing';
+}
+
+function setOrbit(on) {
+  orbit = on;
+  controls.enabled = on;
+  if (on) controls.target.copy(camLook);
+  orbitBtn.textContent = on ? 'חזרה למצלמת הסרט' : 'סיבוב חופשי במצלמה';
+  orbitHint.classList.toggle('show', on);
+}
+
+document.getElementById('playBtn').addEventListener('click', play);
+document.getElementById('replayBtn').addEventListener('click', play);
+orbitBtn.addEventListener('click', () => setOrbit(!orbit));
+addEventListener('keydown', e => {
+  if ((e.key === ' ' || e.key === 'Enter') && state === 'idle') { e.preventDefault(); play(); }
+});
+
+// dev aid: film-v1.html?t=14.5 freezes on that moment (no sound)
+const qT = new URLSearchParams(location.search).get('t');
+if (qT !== null && !isNaN(+qT)) { state = 'seek'; seekT = +qT; intro.classList.add('hide'); }
+
+/* ---------- resize (fills window / iframe) ---------- */
+function resize() {
+  const w = stage.clientWidth || innerWidth, h = stage.clientHeight || innerHeight;
+  renderer.setSize(w, h, false);
+  composer.setSize(w, h);
+  bloom.setSize(w, h);
+  camera.aspect = w / h;
+  camera.updateProjectionMatrix();
+}
+addEventListener('resize', resize);
+resize();
+
+/* ---------- main loop ---------- */
+function frame(ms) {
+  requestAnimationFrame(frame);
+  const wall = ms / 1000;
+  const t = Math.max(0, getT());
+  if (state === 'playing' && t >= DURATION) {
+    state = 'ended';
+    endControls.classList.add('show');
+    progressBar.style.opacity = 0;
+  }
+  if (orbit) controls.update(); else scriptCamera(t, wall);
+  update(t, wall);
+  composer.render();
+}
+requestAnimationFrame(frame);
+</script>
+</body>
+</html>
