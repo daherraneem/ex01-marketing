@@ -1,0 +1,1510 @@
+<!DOCTYPE html>
+<html dir="rtl" lang="he">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AURA | קולקציית ליפ טינט 6D</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Assistant:wght@200;300;400;600;700;800&family=Cormorant+Garamond:ital,wght@0,500;0,700;1,600&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-primary: #fdf6ec;
+      --bg-secondary: #f7dfc2;
+      --bg-accent: #e6a94e;
+      --text-dark: #2c1d14;
+      --text-muted: #6e523f;
+      --tube-color-1: #f5b95f;
+      --tube-color-2: #d68521;
+      --tube-glow: rgba(235, 162, 52, 0.55);
+      --cap-color: #f4e6d4;
+      --transition-speed: 0.85s;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      user-select: none;
+    }
+
+    html, body {
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      font-family: 'Assistant', sans-serif;
+      background: radial-gradient(circle at 50% 42%, var(--bg-primary) 0%, var(--bg-secondary) 58%, var(--bg-accent) 100%);
+      color: var(--text-dark);
+      transition: background 1s cubic-bezier(0.22, 1, 0.36, 1), color 0.6s ease;
+      perspective: 1600px;
+    }
+
+    /* Ambient background aura orbs */
+    .ambient-layer {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 1;
+      overflow: hidden;
+    }
+
+    .aura-orb {
+      position: absolute;
+      border-radius: 50%;
+      filter: blur(85px);
+      opacity: 0.55;
+      transition: background 1.1s ease, transform 1.1s ease;
+      will-change: transform, background;
+    }
+
+    .aura-orb.orb-1 {
+      width: 48vw;
+      height: 48vw;
+      top: -12vw;
+      right: -10vw;
+      background: var(--tube-color-1);
+      animation: orbDrift 14s ease-in-out infinite alternate;
+    }
+
+    .aura-orb.orb-2 {
+      width: 42vw;
+      height: 42vw;
+      bottom: -14vw;
+      left: -8vw;
+      background: var(--tube-color-2);
+      animation: orbDrift 18s ease-in-out infinite alternate-reverse;
+    }
+
+    @keyframes orbDrift {
+      0% { transform: translate3d(0, 0, 0) scale(1); }
+      100% { transform: translate3d(-40px, 35px, 0) scale(1.12); }
+    }
+
+    /* Top Header */
+    header {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      z-index: 30;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 28px 56px;
+      pointer-events: none;
+    }
+
+    .brand-wrap {
+      pointer-events: auto;
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+    }
+
+    .brand-logo {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: clamp(2.1rem, 3.4vw, 3.2rem);
+      font-weight: 700;
+      letter-spacing: 0.28em;
+      color: var(--text-dark);
+      line-height: 1;
+      text-transform: uppercase;
+      transition: color 0.6s ease;
+    }
+
+    .brand-sub {
+      font-size: 0.78rem;
+      letter-spacing: 0.16em;
+      font-weight: 600;
+      color: var(--text-muted);
+      margin-top: 4px;
+      transition: color 0.6s ease;
+    }
+
+    /* Audio Control Button */
+    .audio-controller {
+      pointer-events: auto;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      background: rgba(255, 255, 255, 0.38);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1px solid rgba(255, 255, 255, 0.55);
+      padding: 10px 20px;
+      border-radius: 999px;
+      cursor: pointer;
+      color: var(--text-dark);
+      font-family: 'Assistant', sans-serif;
+      font-weight: 600;
+      font-size: 0.92rem;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.07);
+      transition: transform 0.3s cubic-bezier(0.22, 1, 0.36, 1), background 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    .audio-controller:hover {
+      transform: translate3d(0, -2px, 0) scale(1.03);
+      background: rgba(255, 255, 255, 0.58);
+      box-shadow: 0 14px 34px rgba(0, 0, 0, 0.12);
+    }
+
+    .sound-bars {
+      display: flex;
+      align-items: flex-end;
+      gap: 3px;
+      height: 16px;
+      width: 18px;
+    }
+
+    .sound-bar {
+      width: 3px;
+      background: currentColor;
+      border-radius: 2px;
+      height: 4px;
+      transition: height 0.25s ease;
+    }
+
+    .audio-controller.playing .sound-bar:nth-child(1) {
+      animation: eqBar 0.7s ease-in-out infinite alternate;
+    }
+    .audio-controller.playing .sound-bar:nth-child(2) {
+      animation: eqBar 0.55s ease-in-out 0.15s infinite alternate;
+    }
+    .audio-controller.playing .sound-bar:nth-child(3) {
+      animation: eqBar 0.8s ease-in-out 0.3s infinite alternate;
+    }
+    .audio-controller.playing .sound-bar:nth-child(4) {
+      animation: eqBar 0.6s ease-in-out 0.1s infinite alternate;
+    }
+
+    @keyframes eqBar {
+      0% { height: 4px; }
+      100% { height: 16px; }
+    }
+
+    /* Main Stage & Slides */
+    main.stage {
+      position: relative;
+      width: 100%;
+      height: 100%;
+      z-index: 10;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transform-style: preserve-3d;
+    }
+
+    .slides-container {
+      position: relative;
+      width: 100%;
+      height: 100%;
+      max-width: 1440px;
+      margin: 0 auto;
+    }
+
+    .slide {
+      position: absolute;
+      inset: 0;
+      display: grid;
+      grid-template-columns: 1fr 1.15fr 1fr;
+      align-items: center;
+      padding: 0 56px;
+      pointer-events: none;
+      opacity: 0;
+      visibility: hidden;
+      transition: opacity 0.65s ease, visibility 0.65s ease;
+    }
+
+    .slide.active {
+      opacity: 1;
+      visibility: visible;
+      pointer-events: auto;
+      z-index: 5;
+    }
+
+    .slide.exiting {
+      opacity: 1;
+      visibility: visible;
+      pointer-events: none;
+      z-index: 4;
+    }
+
+    /* Scattered Floating Ingredients */
+    .ingredients-field {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      z-index: 2;
+      overflow: hidden;
+      transform-style: preserve-3d;
+    }
+
+    .ingredient-item {
+      position: absolute;
+      left: var(--x);
+      top: var(--y);
+      font-size: var(--size);
+      filter: drop-shadow(0 22px 26px rgba(0, 0, 0, 0.18)) blur(var(--blur, 0px));
+      will-change: transform, opacity;
+      opacity: 0;
+      transform: translate3d(0, 120px, var(--z, 0px)) rotate(0deg) scale(0.4);
+    }
+
+    /* Custom CSS shape droplet accompanying emojis */
+    .ingredient-item.droplet {
+      width: var(--size);
+      height: calc(var(--size) * 1.28);
+      border-radius: 50% 50% 50% 50% / 62% 62% 38% 38%;
+      background: radial-gradient(circle at 32% 28%, rgba(255, 255, 255, 0.9), var(--drop-color) 58%, var(--drop-deep) 100%);
+      box-shadow: inset -6px -8px 16px rgba(0, 0, 0, 0.2), inset 4px 6px 12px rgba(255, 255, 255, 0.7), 0 20px 30px rgba(0, 0, 0, 0.15);
+    }
+
+    .ingredient-float-inner {
+      display: block;
+      width: 100%;
+      height: 100%;
+      animation: floatIngredient var(--dur, 6s) ease-in-out infinite alternate;
+      animation-delay: var(--delay, 0s);
+      will-change: transform;
+    }
+
+    @keyframes floatIngredient {
+      0% {
+        transform: translate3d(0, -16px, 0) rotate(calc(var(--rot, 10deg) * -1)) scale(1);
+      }
+      100% {
+        transform: translate3d(12px, 18px, 24px) rotate(var(--rot, 10deg)) scale(1.07);
+      }
+    }
+
+    /* Enter pop-up animation for ingredients */
+    .slide.active .ingredient-item {
+      animation: ingredientEnter 0.95s cubic-bezier(0.18, 1.25, 0.36, 1) forwards;
+      animation-delay: var(--enter-delay, 0.08s);
+    }
+
+    @keyframes ingredientEnter {
+      0% {
+        opacity: 0;
+        transform: translate3d(0, 180px, var(--z, 0px)) rotate(-35deg) scale(0.3);
+      }
+      100% {
+        opacity: var(--alpha, 0.95);
+        transform: translate3d(0, 0, var(--z, 0px)) rotate(0deg) scale(1);
+      }
+    }
+
+    /* GRAVITY DROP transition when slide exits */
+    .slide.exiting .ingredient-item {
+      animation: gravityFall 0.78s cubic-bezier(0.55, 0.055, 0.675, 0.19) forwards;
+      animation-delay: var(--fall-delay, 0s);
+    }
+
+    @keyframes gravityFall {
+      0% {
+        opacity: var(--alpha, 0.95);
+        transform: translate3d(0, 0, var(--z, 0px)) rotate(0deg) scale(1);
+      }
+      22% {
+        opacity: 1;
+        transform: translate3d(0, -24px, var(--z, 0px)) rotate(-10deg) scale(1.04);
+      }
+      100% {
+        opacity: 0;
+        transform: translate3d(var(--drift, 25px), 115vh, var(--z, 0px)) rotate(var(--spin, 155deg)) scale(0.75);
+      }
+    }
+
+    /* Right Column: Hebrew Product Typography */
+    .product-info {
+      position: relative;
+      z-index: 8;
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+      max-width: 440px;
+      transform: translate3d(0, 40px, 0);
+      opacity: 0;
+      will-change: transform, opacity;
+    }
+
+    .slide.active .product-info {
+      animation: textRiseIn 0.85s cubic-bezier(0.22, 1, 0.36, 1) 0.15s forwards;
+    }
+
+    .slide.exiting .product-info {
+      animation: textDropOut 0.55s cubic-bezier(0.55, 0.08, 0.68, 0.53) forwards;
+    }
+
+    @keyframes textRiseIn {
+      0% { opacity: 0; transform: translate3d(0, 55px, 0); }
+      100% { opacity: 1; transform: translate3d(0, 0, 0); }
+    }
+
+    @keyframes textDropOut {
+      0% { opacity: 1; transform: translate3d(0, 0, 0); }
+      100% { opacity: 0; transform: translate3d(0, 65px, 0); }
+    }
+
+    .shade-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      align-self: flex-start;
+      padding: 6px 16px;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.48);
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 255, 255, 0.65);
+      font-size: 0.86rem;
+      font-weight: 700;
+      letter-spacing: 0.04em;
+    }
+
+    .shade-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: var(--dot-color);
+      box-shadow: 0 0 10px var(--dot-color);
+    }
+
+    .shade-title {
+      font-size: clamp(3rem, 5.2vw, 5.1rem);
+      font-weight: 800;
+      line-height: 0.98;
+      letter-spacing: -0.02em;
+      color: var(--text-dark);
+      text-shadow: 0 12px 30px rgba(255, 255, 255, 0.35);
+    }
+
+    .shade-subtitle {
+      font-size: 1.25rem;
+      font-weight: 600;
+      color: var(--text-muted);
+    }
+
+    .shade-description {
+      font-size: 1.12rem;
+      line-height: 1.7;
+      font-weight: 400;
+      color: var(--text-dark);
+      opacity: 0.9;
+      background: rgba(255, 255, 255, 0.28);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      padding: 18px 22px;
+      border-radius: 20px;
+      border: 1px solid rgba(255, 255, 255, 0.45);
+      box-shadow: 0 14px 32px rgba(0, 0, 0, 0.04);
+    }
+
+    /* Center Column: 6D Hyper-Realistic Floating Lip Tint */
+    .product-stage-center {
+      position: relative;
+      z-index: 6;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100%;
+      perspective: 1400px;
+      transform-style: preserve-3d;
+    }
+
+    .product-entrance-wrapper {
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      transform-style: preserve-3d;
+      will-change: transform, opacity;
+      opacity: 0;
+    }
+
+    .slide.active .product-entrance-wrapper {
+      animation: productFloatRise 1s cubic-bezier(0.16, 1.18, 0.3, 1) 0.1s forwards;
+    }
+
+    .slide.exiting .product-entrance-wrapper {
+      animation: productSinkExit 0.68s cubic-bezier(0.55, 0.055, 0.675, 0.19) forwards;
+    }
+
+    @keyframes productFloatRise {
+      0% {
+        opacity: 0;
+        transform: translate3d(0, 190px, -160px) rotateX(28deg) rotateZ(-14deg) scale(0.72);
+      }
+      100% {
+        opacity: 1;
+        transform: translate3d(0, 0, 0) rotateX(0deg) rotateZ(0deg) scale(1);
+      }
+    }
+
+    @keyframes productSinkExit {
+      0% {
+        opacity: 1;
+        transform: translate3d(0, 0, 0) rotateZ(0deg) scale(1);
+      }
+      100% {
+        opacity: 0;
+        transform: translate3d(0, 220px, -120px) rotateX(-22deg) rotateZ(12deg) scale(0.8);
+      }
+    }
+
+    /* 6D Levitation Keyframe Container */
+    .lip-tint-6d-rig {
+      position: relative;
+      width: 170px;
+      height: 440px;
+      transform-style: preserve-3d;
+      animation: levitate6D 5.6s ease-in-out infinite;
+      will-change: transform;
+      cursor: grab;
+    }
+
+    @keyframes levitate6D {
+      0% {
+        transform: translate3d(0, -18px, 35px) rotateX(8deg) rotateY(-14deg) rotateZ(-4deg);
+        filter: drop-shadow(0 38px 34px rgba(0, 0, 0, 0.25)) drop-shadow(0 0 42px var(--tube-glow));
+      }
+      50% {
+        transform: translate3d(0, 20px, 65px) rotateX(-7deg) rotateY(16deg) rotateZ(4.5deg);
+        filter: drop-shadow(0 18px 22px rgba(0, 0, 0, 0.34)) drop-shadow(0 0 64px var(--tube-glow));
+      }
+      100% {
+        transform: translate3d(0, -18px, 35px) rotateX(8deg) rotateY(-14deg) rotateZ(-4deg);
+        filter: drop-shadow(0 38px 34px rgba(0, 0, 0, 0.25)) drop-shadow(0 0 42px var(--tube-glow));
+      }
+    }
+
+    /* Gloss Halo Rings behind product for 6D spatial depth */
+    .spatial-halo {
+      position: absolute;
+      width: 340px;
+      height: 340px;
+      border-radius: 50%;
+      border: 1.5px solid rgba(255, 255, 255, 0.55);
+      background: radial-gradient(circle, rgba(255,255,255,0.28) 0%, rgba(255,255,255,0) 70%);
+      transform: translateZ(-60px) rotateX(68deg);
+      animation: haloPulse 5.6s ease-in-out infinite;
+      pointer-events: none;
+    }
+
+    @keyframes haloPulse {
+      0%, 100% { transform: translateZ(-55px) rotateX(68deg) rotateZ(0deg) scale(0.94); opacity: 0.55; }
+      50% { transform: translateZ(-55px) rotateX(62deg) rotateZ(180deg) scale(1.12); opacity: 0.9; }
+    }
+
+    /* 3D Lip Tint Bottle Sculpture */
+    .bottle-assembly {
+      position: relative;
+      width: 100%;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      transform-style: preserve-3d;
+    }
+
+    /* Luxury Cap */
+    .bottle-cap {
+      position: relative;
+      width: 108px;
+      height: 138px;
+      border-radius: 26px 26px 8px 8px;
+      background: linear-gradient(100deg,
+        #ffffff 0%,
+        var(--cap-tint, #f5e6d8) 28%,
+        #d8c7b8 64%,
+        #a38f7e 88%,
+        #f9f3eb 100%);
+      box-shadow:
+        inset 0 6px 12px rgba(255, 255, 255, 0.9),
+        inset -10px 0 18px rgba(0, 0, 0, 0.15),
+        0 10px 20px rgba(0, 0, 0, 0.14);
+      transform: translateZ(20px);
+      overflow: hidden;
+    }
+
+    .bottle-cap::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      left: 22%;
+      width: 16px;
+      background: linear-gradient(90deg, rgba(255,255,255,0), rgba(255,255,255,0.92), rgba(255,255,255,0));
+      filter: blur(1px);
+    }
+
+    /* Metallic Gold/Silver Collar Ring */
+    .bottle-collar {
+      width: 112px;
+      height: 18px;
+      background: linear-gradient(90deg, #b88746 0%, #fdf0a6 28%, #d4a15a 55%, #8c5c21 82%, #f5dc8c 100%);
+      border-radius: 4px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.22), inset 0 2px 4px rgba(255, 255, 255, 0.8);
+      transform: translateZ(22px);
+      z-index: 3;
+    }
+
+    /* Acrylic Glass Outer Body + Inner Suspended Tint Chamber */
+    .bottle-body {
+      position: relative;
+      width: 118px;
+      height: 278px;
+      margin-top: -2px;
+      border-radius: 16px 16px 38px 38px;
+      background: linear-gradient(105deg,
+        rgba(255, 255, 255, 0.72) 0%,
+        rgba(255, 255, 255, 0.22) 22%,
+        rgba(255, 255, 255, 0.08) 65%,
+        rgba(255, 255, 255, 0.52) 100%);
+      padding: 11px;
+      box-shadow:
+        inset 0 0 22px rgba(255, 255, 255, 0.85),
+        inset -8px -12px 24px rgba(0, 0, 0, 0.18),
+        0 20px 40px rgba(0, 0, 0, 0.18);
+      backdrop-filter: blur(6px);
+      transform: translateZ(24px);
+      display: flex;
+      align-items: stretch;
+      justify-content: center;
+      overflow: hidden;
+    }
+
+    .liquid-chamber {
+      position: relative;
+      width: 100%;
+      height: 100%;
+      border-radius: 10px 10px 28px 28px;
+      background: linear-gradient(165deg,
+        var(--liquid-top) 0%,
+        var(--liquid-mid) 52%,
+        var(--liquid-bottom) 100%);
+      box-shadow:
+        inset 6px 8px 18px rgba(255, 255, 255, 0.55),
+        inset -10px -14px 24px rgba(0, 0, 0, 0.38);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: space-between;
+      padding: 34px 8px 26px;
+      overflow: hidden;
+    }
+
+    /* Internal floating shimmer bubble inside the bottle */
+    .liquid-chamber::before {
+      content: '';
+      position: absolute;
+      top: -20%;
+      left: -30%;
+      width: 140%;
+      height: 65%;
+      background: radial-gradient(circle, rgba(255, 255, 255, 0.52) 0%, rgba(255, 255, 255, 0) 70%);
+      transform: rotate(-18deg);
+      pointer-events: none;
+    }
+
+    /* Specular glass reflection strip */
+    .glass-specular {
+      position: absolute;
+      top: 10px;
+      bottom: 18px;
+      left: 16px;
+      width: 14px;
+      border-radius: 999px;
+      background: linear-gradient(180deg, rgba(255,255,255,0.92) 0%, rgba(255,255,255,0.2) 65%, rgba(255,255,255,0.65) 100%);
+      filter: blur(0.6px);
+      pointer-events: none;
+      z-index: 5;
+    }
+
+    .bottle-brand-vertical {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 1.72rem;
+      font-weight: 700;
+      letter-spacing: 0.28em;
+      color: rgba(255, 255, 255, 0.96);
+      text-shadow: 0 2px 10px rgba(0, 0, 0, 0.25);
+      writing-mode: vertical-rl;
+      text-orientation: mixed;
+      transform: rotate(180deg);
+      z-index: 4;
+    }
+
+    .bottle-shade-label {
+      font-size: 0.72rem;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      color: rgba(255, 255, 255, 0.92);
+      background: rgba(0, 0, 0, 0.18);
+      padding: 4px 10px;
+      border-radius: 999px;
+      backdrop-filter: blur(4px);
+      z-index: 4;
+    }
+
+    /* Ground Reactive Shadow */
+    .ground-shadow {
+      width: 150px;
+      height: 28px;
+      margin-top: 38px;
+      border-radius: 50%;
+      background: radial-gradient(ellipse at center, rgba(0, 0, 0, 0.36) 0%, rgba(0, 0, 0, 0) 75%);
+      filter: blur(8px);
+      animation: shadowBreathe 5.6s ease-in-out infinite;
+      will-change: transform, opacity;
+    }
+
+    @keyframes shadowBreathe {
+      0%, 100% {
+        transform: scale(0.82);
+        opacity: 0.48;
+      }
+      50% {
+        transform: scale(1.15);
+        opacity: 0.82;
+      }
+    }
+
+    /* Left Column: Finish & Glow Specs Card */
+    .sensory-card {
+      position: relative;
+      z-index: 8;
+      justify-self: end;
+      width: 100%;
+      max-width: 340px;
+      background: rgba(255, 255, 255, 0.34);
+      backdrop-filter: blur(18px);
+      -webkit-backdrop-filter: blur(18px);
+      border: 1px solid rgba(255, 255, 255, 0.58);
+      border-radius: 28px;
+      padding: 26px 28px;
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.07);
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+      opacity: 0;
+      transform: translate3d(0, 45px, 0);
+      will-change: transform, opacity;
+    }
+
+    .slide.active .sensory-card {
+      animation: textRiseIn 0.85s cubic-bezier(0.22, 1, 0.36, 1) 0.26s forwards;
+    }
+
+    .slide.exiting .sensory-card {
+      animation: textDropOut 0.5s cubic-bezier(0.55, 0.08, 0.68, 0.53) forwards;
+    }
+
+    .swatch-preview {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .swatch-smear {
+      width: 58px;
+      height: 58px;
+      border-radius: 42% 58% 64% 36% / 44% 38% 62% 56%;
+      background: radial-gradient(circle at 30% 30%, rgba(255,255,255,0.9), var(--liquid-top) 32%, var(--liquid-mid) 72%, var(--liquid-bottom) 100%);
+      box-shadow: 0 10px 22px var(--tube-glow), inset 2px 4px 10px rgba(255, 255, 255, 0.75);
+      flex-shrink: 0;
+      animation: morphBlob 6s ease-in-out infinite alternate;
+    }
+
+    @keyframes morphBlob {
+      0% { border-radius: 42% 58% 64% 36% / 44% 38% 62% 56%; transform: rotate(0deg); }
+      100% { border-radius: 58% 42% 38% 62% / 56% 62% 38% 44%; transform: rotate(10deg); }
+    }
+
+    .swatch-meta h4 {
+      font-size: 1.05rem;
+      font-weight: 700;
+      color: var(--text-dark);
+    }
+
+    .swatch-meta p {
+      font-size: 0.88rem;
+      color: var(--text-muted);
+      margin-top: 2px;
+    }
+
+    .meter-group {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .meter-row {
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+    }
+
+    .meter-labels {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.84rem;
+      font-weight: 600;
+      color: var(--text-dark);
+    }
+
+    .meter-track {
+      width: 100%;
+      height: 7px;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.55);
+      overflow: hidden;
+    }
+
+    .meter-fill {
+      height: 100%;
+      width: var(--fill, 90%);
+      border-radius: 999px;
+      background: linear-gradient(90deg, var(--liquid-top), var(--liquid-bottom));
+    }
+
+    /* Bottom Navigation Bar */
+    .bottom-nav {
+      position: fixed;
+      bottom: 30px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 35;
+      display: flex;
+      align-items: center;
+      gap: 20px;
+      background: rgba(255, 255, 255, 0.42);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border: 1px solid rgba(255, 255, 255, 0.65);
+      padding: 10px 18px;
+      border-radius: 999px;
+      box-shadow: 0 18px 42px rgba(0, 0, 0, 0.1);
+    }
+
+    .nav-btn {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 22px;
+      border-radius: 999px;
+      border: none;
+      background: var(--text-dark);
+      color: #ffffff;
+      font-family: 'Assistant', sans-serif;
+      font-size: 0.95rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: transform 0.28s cubic-bezier(0.22, 1, 0.36, 1), background 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    .nav-btn:hover {
+      transform: translate3d(0, -2px, 0) scale(1.04);
+      box-shadow: 0 10px 22px rgba(0, 0, 0, 0.18);
+    }
+
+    .nav-btn:active {
+      transform: scale(0.97);
+    }
+
+    .slide-indicators {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 0 8px;
+    }
+
+    .dot-btn {
+      width: 12px;
+      height: 12px;
+      border-radius: 999px;
+      border: none;
+      background: rgba(0, 0, 0, 0.22);
+      cursor: pointer;
+      transition: width 0.35s cubic-bezier(0.22, 1, 0.36, 1), background 0.35s ease, transform 0.25s ease;
+    }
+
+    .dot-btn.active {
+      width: 34px;
+      background: var(--text-dark);
+    }
+
+    .dot-btn:hover {
+      transform: scale(1.2);
+    }
+
+    /* Responsive adjustments */
+    @media (max-width: 1024px) {
+      header {
+        padding: 20px 28px;
+      }
+      .slide {
+        grid-template-columns: 1fr;
+        grid-template-rows: auto 1fr auto;
+        padding: 86px 24px 105px;
+        text-align: center;
+        justify-items: center;
+      }
+      .product-info {
+        align-items: center;
+        max-width: 540px;
+        gap: 10px;
+      }
+      .shade-badge {
+        align-self: center;
+      }
+      .shade-title {
+        font-size: clamp(2.3rem, 7vw, 3.4rem);
+      }
+      .shade-description {
+        font-size: 0.98rem;
+        padding: 12px 18px;
+      }
+      .lip-tint-6d-rig {
+        width: 130px;
+        height: 320px;
+      }
+      .bottle-cap {
+        width: 82px;
+        height: 98px;
+      }
+      .bottle-collar {
+        width: 86px;
+        height: 14px;
+      }
+      .bottle-body {
+        width: 92px;
+        height: 205px;
+      }
+      .sensory-card {
+        display: none;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Ambient Background Orbs -->
+  <div class="ambient-layer" aria-hidden="true">
+    <div class="aura-orb orb-1"></div>
+    <div class="aura-orb orb-2"></div>
+  </div>
+
+  <!-- Background Ambient Audio (Placeholder URL + WebAudio Synthesizer Fallback for guaranteed gentle ambient music) -->
+  <audio id="ambientAudio" loop preload="none" src="https://cdn.pixabay.com/download/audio/2022/05/27/audio_1808fbf07a.mp3?filename=ambient-piano-logo-111507.mp3"></audio>
+
+  <!-- Fixed Header -->
+  <header>
+    <div class="brand-wrap">
+      <div class="brand-logo">AURA</div>
+      <div class="brand-sub">קולקציית ליפ טינט 6D זוהרת</div>
+    </div>
+
+    <button id="audioToggleBtn" class="audio-controller" type="button" aria-label="נגן או השתק מוזיקת רקע">
+      <div class="sound-bars" aria-hidden="true">
+        <span class="sound-bar"></span>
+        <span class="sound-bar"></span>
+        <span class="sound-bar"></span>
+        <span class="sound-bar"></span>
+      </div>
+      <span id="audioStatusText">הפעל צליל אווירה</span>
+    </button>
+  </header>
+
+  <!-- Interactive Presentation Stage -->
+  <main class="stage" id="presentationStage">
+    <div class="slides-container" id="slidesContainer">
+
+      <!-- SLIDE 1: דבש (Honey) -->
+      <section class="slide active"
+        data-index="0"
+        data-bg-primary="#fff9ed"
+        data-bg-secondary="#f8dfa8"
+        data-bg-accent="#e3a036"
+        data-text-dark="#33200d"
+        data-text-muted="#785328"
+        data-tube-1="#f7be4f"
+        data-tube-2="#c97a10"
+        data-glow="rgba(245, 168, 35, 0.6)">
+
+        <div class="ingredients-field" aria-hidden="true">
+          <div class="ingredient-item" style="--x: 10%; --y: 18%; --size: 4.2rem; --z: 60px; --rot: 16deg; --dur: 5.5s; --enter-delay: 0.05s; --fall-delay: 0.02s; --drift: -40px; --spin: 140deg;"><span class="ingredient-float-inner">🍯</span></div>
+          <div class="ingredient-item droplet" style="--x: 24%; --y: 68%; --size: 38px; --z: 90px; --rot: -18deg; --dur: 4.8s; --enter-delay: 0.12s; --fall-delay: 0.08s; --drift: 30px; --spin: -160deg; --drop-color: #f9b826; --drop-deep: #b86b05;"><span class="ingredient-float-inner"></span></div>
+          <div class="ingredient-item" style="--x: 42%; --y: 12%; --size: 3.1rem; --z: -40px; --blur: 1.5px; --rot: 22deg; --dur: 6.4s; --enter-delay: 0.18s; --fall-delay: 0.04s; --drift: 55px; --spin: 190deg;"><span class="ingredient-float-inner">🐝</span></div>
+          <div class="ingredient-item droplet" style="--x: 61%; --y: 74%; --size: 46px; --z: 110px; --rot: 14deg; --dur: 5.2s; --enter-delay: 0.15s; --fall-delay: 0.11s; --drift: -50px; --spin: 135deg; --drop-color: #ffd059; --drop-deep: #cf7d0a;"><span class="ingredient-float-inner"></span></div>
+          <div class="ingredient-item" style="--x: 78%; --y: 20%; --size: 4.6rem; --z: 80px; --rot: -14deg; --dur: 6s; --enter-delay: 0.09s; --fall-delay: 0.05s; --drift: 45px; --spin: -145deg;"><span class="ingredient-float-inner">🍯</span></div>
+          <div class="ingredient-item" style="--x: 84%; --y: 66%; --size: 3.4rem; --z: -30px; --blur: 1px; --rot: 18deg; --dur: 7s; --enter-delay: 0.22s; --fall-delay: 0.14s; --drift: -30px; --spin: 175deg;"><span class="ingredient-float-inner">🌼</span></div>
+          <div class="ingredient-item droplet" style="--x: 34%; --y: 30%; --size: 28px; --z: -60px; --blur: 2px; --rot: -12deg; --dur: 5.9s; --enter-delay: 0.25s; --fall-delay: 0.09s; --drift: 25px; --spin: 200deg; --drop-color: #ffca4b; --drop-deep: #d48308;"><span class="ingredient-float-inner"></span></div>
+        </div>
+
+        <div class="product-info">
+          <div class="shade-badge" style="--dot-color: #f09d18;">
+            <span class="shade-dot"></span>
+            <span>גוון 01 • מהדורת נקטר זהב</span>
+          </div>
+          <h1 class="shade-title">דבש טהור</h1>
+          <div class="shade-subtitle">GOLDEN HONEY GLAZE</div>
+          <p class="shade-description">
+            ברק ענברי עמוק העוטף את השפתיים בזוהר זהוב-חמים של דבש פרחי בר. מעניק אפקט זכוכית תלת-ממדי, הזנה עשירה ומראה שפתיים מלאות וקורנות באור טבעי.
+          </p>
+        </div>
+
+        <div class="product-stage-center">
+          <div class="product-entrance-wrapper"
+            style="--liquid-top: #ffcf61; --liquid-mid: #e69217; --liquid-bottom: #9c5304; --cap-tint: #faecd4;">
+            <div class="spatial-halo"></div>
+            <div class="lip-tint-6d-rig">
+              <div class="bottle-assembly">
+                <div class="bottle-cap"></div>
+                <div class="bottle-collar"></div>
+                <div class="bottle-body">
+                  <div class="glass-specular"></div>
+                  <div class="liquid-chamber">
+                    <span class="bottle-brand-vertical">AURA</span>
+                    <span class="bottle-shade-label">01 דבש</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="ground-shadow"></div>
+          </div>
+        </div>
+
+        <aside class="sensory-card"
+          style="--liquid-top: #ffcf61; --liquid-mid: #e69217; --liquid-bottom: #9c5304;">
+          <div class="swatch-preview">
+            <div class="swatch-smear"></div>
+            <div class="swatch-meta">
+              <h4>פיגמנט ענבר שקוף</h4>
+              <p>גימור מראה רטוב וזוהר</p>
+            </div>
+          </div>
+          <div class="meter-group">
+            <div class="meter-row">
+              <div class="meter-labels"><span>רמת ברק 6D</span><span>98%</span></div>
+              <div class="meter-track"><div class="meter-fill" style="--fill: 98%;"></div></div>
+            </div>
+            <div class="meter-row">
+              <div class="meter-labels"><span>לחות והזנה</span><span>95%</span></div>
+              <div class="meter-track"><div class="meter-fill" style="--fill: 95%;"></div></div>
+            </div>
+            <div class="meter-row">
+              <div class="meter-labels"><span>עוצמת גוון</span><span>65%</span></div>
+              <div class="meter-track"><div class="meter-fill" style="--fill: 65%;"></div></div>
+            </div>
+          </div>
+        </aside>
+      </section>
+
+      <!-- SLIDE 2: אפרסק (Peach) -->
+      <section class="slide"
+        data-index="1"
+        data-bg-primary="#fff3ed"
+        data-bg-secondary="#ffd4be"
+        data-bg-accent="#f48b6a"
+        data-text-dark="#381810"
+        data-text-muted="#854534"
+        data-tube-1="#ff9d7e"
+        data-tube-2="#e35d3d"
+        data-glow="rgba(247, 118, 84, 0.58)">
+
+        <div class="ingredients-field" aria-hidden="true">
+          <div class="ingredient-item" style="--x: 12%; --y: 22%; --size: 4.5rem; --z: 75px; --rot: -15deg; --dur: 5.4s; --enter-delay: 0.04s; --fall-delay: 0.02s; --drift: -45px; --spin: -150deg;"><span class="ingredient-float-inner">🍑</span></div>
+          <div class="ingredient-item droplet" style="--x: 26%; --y: 72%; --size: 40px; --z: 95px; --rot: 20deg; --dur: 5s; --enter-delay: 0.14s; --fall-delay: 0.07s; --drift: 35px; --spin: 165deg; --drop-color: #ffa68a; --drop-deep: #d94e2b;"><span class="ingredient-float-inner"></span></div>
+          <div class="ingredient-item" style="--x: 38%; --y: 14%; --size: 3.6rem; --z: -45px; --blur: 1.5px; --rot: 18deg; --dur: 6.2s; --enter-delay: 0.19s; --fall-delay: 0.05s; --drift: -25px; --spin: 180deg;"><span class="ingredient-float-inner">🍑</span></div>
+          <div class="ingredient-item" style="--x: 75%; --y: 18%; --size: 4.8rem; --z: 85px; --rot: 14deg; --dur: 5.8s; --enter-delay: 0.08s; --fall-delay: 0.03s; --drift: 50px; --spin: 140deg;"><span class="ingredient-float-inner">🍑</span></div>
+          <div class="ingredient-item droplet" style="--x: 64%; --y: 70%; --size: 44px; --z: 70px; --rot: -16deg; --dur: 5.1s; --enter-delay: 0.16s; --fall-delay: 0.11s; --drift: -40px; --spin: -175deg; --drop-color: #ff8e6e; --drop-deep: #c94122;"><span class="ingredient-float-inner"></span></div>
+          <div class="ingredient-item" style="--x: 83%; --y: 62%; --size: 3.3rem; --z: -25px; --blur: 1px; --rot: -20deg; --dur: 6.6s; --enter-delay: 0.22s; --fall-delay: 0.13s; --drift: 30px; --spin: -130deg;"><span class="ingredient-float-inner">🌸</span></div>
+        </div>
+
+        <div class="product-info">
+          <div class="shade-badge" style="--dot-color: #f47151;">
+            <span class="shade-dot"></span>
+            <span>גוון 02 • קולקציית שמש קיצית</span>
+          </div>
+          <h1 class="shade-title">אפרסק עסיסי</h1>
+          <div class="shade-subtitle">VELVET PEACH NECTAR</div>
+          <p class="shade-description">
+            נגיעה רעננה של אפרסק בשל שטוף שמש. משלב תת-גוון קורלי-ורדרד המחמיא לכל גוון עור, ומעניק לשפתיים מראה חי, צעיר ומלא ברק קריסטלי רך.
+          </p>
+        </div>
+
+        <div class="product-stage-center">
+          <div class="product-entrance-wrapper"
+            style="--liquid-top: #ffb299; --liquid-mid: #f26c4b; --liquid-bottom: #b33216; --cap-tint: #ffe7de;">
+            <div class="spatial-halo"></div>
+            <div class="lip-tint-6d-rig">
+              <div class="bottle-assembly">
+                <div class="bottle-cap"></div>
+                <div class="bottle-collar"></div>
+                <div class="bottle-body">
+                  <div class="glass-specular"></div>
+                  <div class="liquid-chamber">
+                    <span class="bottle-brand-vertical">AURA</span>
+                    <span class="bottle-shade-label">02 אפרסק</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="ground-shadow"></div>
+          </div>
+        </div>
+
+        <aside class="sensory-card"
+          style="--liquid-top: #ffb299; --liquid-mid: #f26c4b; --liquid-bottom: #b33216;">
+          <div class="swatch-preview">
+            <div class="swatch-smear"></div>
+            <div class="swatch-meta">
+              <h4>קורל אפרסקי קורן</h4>
+              <p>אפקט שפתיים עסיסיות ורכות</p>
+            </div>
+          </div>
+          <div class="meter-group">
+            <div class="meter-row">
+              <div class="meter-labels"><span>רמת ברק 6D</span><span>94%</span></div>
+              <div class="meter-track"><div class="meter-fill" style="--fill: 94%;"></div></div>
+            </div>
+            <div class="meter-row">
+              <div class="meter-labels"><span>לחות והזנה</span><span>92%</span></div>
+              <div class="meter-track"><div class="meter-fill" style="--fill: 92%;"></div></div>
+            </div>
+            <div class="meter-row">
+              <div class="meter-labels"><span>עוצמת גוון</span><span>78%</span></div>
+              <div class="meter-track"><div class="meter-fill" style="--fill: 78%;"></div></div>
+            </div>
+          </div>
+        </aside>
+      </section>
+
+      <!-- SLIDE 3: פירות יער (Berries/Strawberry) -->
+      <section class="slide"
+        data-index="2"
+        data-bg-primary="#fff0f5"
+        data-bg-secondary="#f8bfd4"
+        data-bg-accent="#d94b7d"
+        data-text-dark="#330b1c"
+        data-text-muted="#7d3150"
+        data-tube-1="#f26b9a"
+        data-tube-2="#b31b50"
+        data-glow="rgba(219, 59, 115, 0.6)">
+
+        <div class="ingredients-field" aria-hidden="true">
+          <div class="ingredient-item" style="--x: 11%; --y: 20%; --size: 4.4rem; --z: 80px; --rot: 18deg; --dur: 5.2s; --enter-delay: 0.05s; --fall-delay: 0.01s; --drift: -50px; --spin: 165deg;"><span class="ingredient-float-inner">🍓</span></div>
+          <div class="ingredient-item" style="--x: 25%; --y: 66%; --size: 3.8rem; --z: 65px; --rot: -16deg; --dur: 5.9s; --enter-delay: 0.12s; --fall-delay: 0.06s; --drift: 40px; --spin: -145deg;"><span class="ingredient-float-inner">🫐</span></div>
+          <div class="ingredient-item droplet" style="--x: 39%; --y: 15%; --size: 36px; --z: -40px; --blur: 1.5px; --rot: 12deg; --dur: 6.1s; --enter-delay: 0.18s; --fall-delay: 0.09s; --drift: -30px; --spin: 180deg; --drop-color: #ff6e9f; --drop-deep: #a31244;"><span class="ingredient-float-inner"></span></div>
+          <div class="ingredient-item" style="--x: 74%; --y: 19%; --size: 4.7rem; --z: 90px; --rot: -14deg; --dur: 5.5s; --enter-delay: 0.08s; --fall-delay: 0.04s; --drift: 55px; --spin: -160deg;"><span class="ingredient-float-inner">🍓</span></div>
+          <div class="ingredient-item droplet" style="--x: 62%; --y: 72%; --size: 44px; --z: 95px; --rot: 20deg; --dur: 4.9s; --enter-delay: 0.15s; --fall-delay: 0.12s; --drift: -35px; --spin: 150deg; --drop-color: #f54e86; --drop-deep: #8c0c38;"><span class="ingredient-float-inner"></span></div>
+          <div class="ingredient-item" style="--x: 84%; --y: 64%; --size: 3.9rem; --z: -20px; --blur: 1px; --rot: 15deg; --dur: 6.5s; --enter-delay: 0.21s; --fall-delay: 0.14s; --drift: 30px; --spin: 195deg;"><span class="ingredient-float-inner">🫐</span></div>
+        </div>
+
+        <div class="product-info">
+          <div class="shade-badge" style="--dot-color: #d62865;">
+            <span class="shade-dot"></span>
+            <span>גוון 03 • תמצית פירות יער</span>
+          </div>
+          <h1 class="shade-title">פירות יער</h1>
+          <div class="shade-subtitle">BERRY CRUSH ELIXIR</div>
+          <p class="shade-description">
+            מיזוג עוצר נשימה של תות שדה מתוק ואוכמניות בר. צובע את השפתיים בגוון ורוד-פטל רווי וחושני עם השתקפות אור מרהיבה שנשארת לאורך שעות.
+          </p>
+        </div>
+
+        <div class="product-stage-center">
+          <div class="product-entrance-wrapper"
+            style="--liquid-top: #ff7aa8; --liquid-mid: #d42663; --liquid-bottom: #78072f; --cap-tint: #fce1eb;">
+            <div class="spatial-halo"></div>
+            <div class="lip-tint-6d-rig">
+              <div class="bottle-assembly">
+                <div class="bottle-cap"></div>
+                <div class="bottle-collar"></div>
+                <div class="bottle-body">
+                  <div class="glass-specular"></div>
+                  <div class="liquid-chamber">
+                    <span class="bottle-brand-vertical">AURA</span>
+                    <span class="bottle-shade-label">03 פירות יער</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="ground-shadow"></div>
+          </div>
+        </div>
+
+        <aside class="sensory-card"
+          style="--liquid-top: #ff7aa8; --liquid-mid: #d42663; --liquid-bottom: #78072f;">
+          <div class="swatch-preview">
+            <div class="swatch-smear"></div>
+            <div class="swatch-meta">
+              <h4>ורוד פטל עמוק</h4>
+              <p>אפקט שפתיים נשוכות וזוהרות</p>
+            </div>
+          </div>
+          <div class="meter-group">
+            <div class="meter-row">
+              <div class="meter-labels"><span>רמת ברק 6D</span><span>96%</span></div>
+              <div class="meter-track"><div class="meter-fill" style="--fill: 96%;"></div></div>
+            </div>
+            <div class="meter-row">
+              <div class="meter-labels"><span>לחות והזנה</span><span>90%</span></div>
+              <div class="meter-track"><div class="meter-fill" style="--fill: 90%;"></div></div>
+            </div>
+            <div class="meter-row">
+              <div class="meter-labels"><span>עוצמת גוון</span><span>88%</span></div>
+              <div class="meter-track"><div class="meter-fill" style="--fill: 88%;"></div></div>
+            </div>
+          </div>
+        </aside>
+      </section>
+
+      <!-- SLIDE 4: רימון (Pomegranate) -->
+      <section class="slide"
+        data-index="3"
+        data-bg-primary="#fff0f0"
+        data-bg-secondary="#f5b5bc"
+        data-bg-accent="#b82538"
+        data-text-dark="#2e070d"
+        data-text-muted="#751d29"
+        data-tube-1="#e33b52"
+        data-tube-2="#87091b"
+        data-glow="rgba(196, 24, 49, 0.64)">
+
+        <div class="ingredients-field" aria-hidden="true">
+          <div class="ingredient-item droplet" style="--x: 12%; --y: 22%; --size: 46px; --z: 85px; --rot: 16deg; --dur: 5.1s; --enter-delay: 0.04s; --fall-delay: 0.02s; --drift: -45px; --spin: 170deg; --drop-color: #ff3b56; --drop-deep: #800516;"><span class="ingredient-float-inner"></span></div>
+          <div class="ingredient-item" style="--x: 23%; --y: 66%; --size: 4.1rem; --z: 70px; --rot: -18deg; --dur: 5.7s; --enter-delay: 0.11s; --fall-delay: 0.06s; --drift: 35px; --spin: -155deg;"><span class="ingredient-float-inner">🍒</span></div>
+          <div class="ingredient-item" style="--x: 38%; --y: 14%; --size: 3.2rem; --z: -35px; --blur: 1px; --rot: 24deg; --dur: 6.3s; --enter-delay: 0.17s; --fall-delay: 0.08s; --drift: -30px; --spin: 190deg;"><span class="ingredient-float-inner">♦️</span></div>
+          <div class="ingredient-item droplet" style="--x: 75%; --y: 20%; --size: 52px; --z: 95px; --rot: -14deg; --dur: 5.4s; --enter-delay: 0.07s; --fall-delay: 0.03s; --drift: 50px; --spin: -140deg; --drop-color: #eb1c38; --drop-deep: #690210;"><span class="ingredient-float-inner"></span></div>
+          <div class="ingredient-item" style="--x: 63%; --y: 72%; --size: 3.8rem; --z: 80px; --rot: 15deg; --dur: 5s; --enter-delay: 0.15s; --fall-delay: 0.11s; --drift: -40px; --spin: 160deg;"><span class="ingredient-float-inner">🌺</span></div>
+          <div class="ingredient-item droplet" style="--x: 84%; --y: 62%; --size: 34px; --z: -30px; --blur: 1.5px; --rot: -20deg; --dur: 6.6s; --enter-delay: 0.21s; --fall-delay: 0.14s; --drift: 25px; --spin: -180deg; --drop-color: #ff5268; --drop-deep: #8f081b;"><span class="ingredient-float-inner"></span></div>
+        </div>
+
+        <div class="product-info">
+          <div class="shade-badge" style="--dot-color: #c4142c;">
+            <span class="shade-dot"></span>
+            <span>גוון 04 • רובי מלכותי</span>
+          </div>
+          <h1 class="shade-title">רימון רובי</h1>
+          <div class="shade-subtitle">RUBY POMEGRANATE JEWEL</div>
+          <p class="shade-description">
+            אדום ארגמני עוצמתי בהשראת גרגרי רימון נוצצים כיהלומים. מעניק לשפתיים נוכחות דרמטית, עומק מלכותי וברק זגוגי מהפנט שמאיר את הפנים ברגע.
+          </p>
+        </div>
+
+        <div class="product-stage-center">
+          <div class="product-entrance-wrapper"
+            style="--liquid-top: #ff4760; --liquid-mid: #ba1128; --liquid-bottom: #59020e; --cap-tint: #fadce0;">
+            <div class="spatial-halo"></div>
+            <div class="lip-tint-6d-rig">
+              <div class="bottle-assembly">
+                <div class="bottle-cap"></div>
+                <div class="bottle-collar"></div>
+                <div class="bottle-body">
+                  <div class="glass-specular"></div>
+                  <div class="liquid-chamber">
+                    <span class="bottle-brand-vertical">AURA</span>
+                    <span class="bottle-shade-label">04 רימון</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="ground-shadow"></div>
+          </div>
+        </div>
+
+        <aside class="sensory-card"
+          style="--liquid-top: #ff4760; --liquid-mid: #ba1128; --liquid-bottom: #59020e;">
+          <div class="swatch-preview">
+            <div class="swatch-smear"></div>
+            <div class="swatch-meta">
+              <h4>אדום רובי עמוק</h4>
+              <p>גימור תכשיט קריסטלי יוקרתי</p>
+            </div>
+          </div>
+          <div class="meter-group">
+            <div class="meter-row">
+              <div class="meter-labels"><span>רמת ברק 6D</span><span>97%</span></div>
+              <div class="meter-track"><div class="meter-fill" style="--fill: 97%;"></div></div>
+            </div>
+            <div class="meter-row">
+              <div class="meter-labels"><span>לחות והזנה</span><span>91%</span></div>
+              <div class="meter-track"><div class="meter-fill" style="--fill: 91%;"></div></div>
+            </div>
+            <div class="meter-row">
+              <div class="meter-labels"><span>עוצמת גוון</span><span>95%</span></div>
+              <div class="meter-track"><div class="meter-fill" style="--fill: 95%;"></div></div>
+            </div>
+          </div>
+        </aside>
+      </section>
+
+      <!-- SLIDE 5: קקאו (Chocolate/Cocoa) -->
+      <section class="slide"
+        data-index="4"
+        data-bg-primary="#f7efe8"
+        data-bg-secondary="#dec3ae"
+        data-bg-accent="#7d4e32"
+        data-text-dark="#241309"
+        data-text-muted="#633e27"
+        data-tube-1="#a66843"
+        data-tube-2="#4f2912"
+        data-glow="rgba(122, 69, 36, 0.62)">
+
+        <div class="ingredients-field" aria-hidden="true">
+          <div class="ingredient-item" style="--x: 11%; --y: 20%; --size: 4.4rem; --z: 80px; --rot: -16deg; --dur: 5.5s; --enter-delay: 0.04s; --fall-delay: 0.02s; --drift: -45px; --spin: -160deg;"><span class="ingredient-float-inner">🍫</span></div>
+          <div class="ingredient-item droplet" style="--x: 25%; --y: 68%; --size: 44px; --z: 90px; --rot: 18deg; --dur: 5.1s; --enter-delay: 0.12s; --fall-delay: 0.07s; --drift: 35px; --spin: 150deg; --drop-color: #b5734a; --drop-deep: #47220c;"><span class="ingredient-float-inner"></span></div>
+          <div class="ingredient-item" style="--x: 39%; --y: 14%; --size: 3.4rem; --z: -40px; --blur: 1.5px; --rot: 20deg; --dur: 6.4s; --enter-delay: 0.18s; --fall-delay: 0.05s; --drift: -30px; --spin: 185deg;"><span class="ingredient-float-inner">🫘</span></div>
+          <div class="ingredient-item" style="--x: 75%; --y: 19%; --size: 4.6rem; --z: 85px; --rot: 15deg; --dur: 5.8s; --enter-delay: 0.08s; --fall-delay: 0.03s; --drift: 50px; --spin: 145deg;"><span class="ingredient-float-inner">🍫</span></div>
+          <div class="ingredient-item droplet" style="--x: 62%; --y: 72%; --size: 48px; --z: 95px; --rot: -14deg; --dur: 5s; --enter-delay: 0.15s; --fall-delay: 0.11s; --drift: -40px; --spin: -170deg; --drop-color: #9c5b34; --drop-deep: #3b1a07;"><span class="ingredient-float-inner"></span></div>
+          <div class="ingredient-item" style="--x: 83%; --y: 63%; --size: 3.5rem; --z: -25px; --blur: 1px; --rot: -18deg; --dur: 6.7s; --enter-delay: 0.22s; --fall-delay: 0.13s; --drift: 30px; --spin: -140deg;"><span class="ingredient-float-inner">☕</span></div>
+        </div>
+
+        <div class="product-info">
+          <div class="shade-badge" style="--dot-color: #6e3b1e;">
+            <span class="shade-dot"></span>
+            <span>גוון 05 • אספרסו שוקולד עשיר</span>
+          </div>
+          <h1 class="shade-title">קקאו קטיפתי</h1>
+          <div class="shade-subtitle">SILK COCOA GLAZE</div>
+          <p class="shade-description">
+            חום-שוקולד חמים ועמוק בניחוח פולי קקאו קלויים. מעניק לשפתיים מראה ניוד-בראון מתוחכם עם גימור גלוסי עשיר שמדגיש ומפסל את קווי המתאר של השפתיים.
+          </p>
+        </div>
+
+        <div class="product-stage-center">
+          <div class="product-entrance-wrapper"
+            style="--liquid-top: #c47e54; --liquid-mid: #784121; --liquid-bottom: #381906; --cap-tint: #ede0d5;">
+            <div class="spatial-halo"></div>
+            <div class="lip-tint-6d-rig">
+              <div class="bottle-assembly">
+                <div class="bottle-cap"></div>
+                <div class="bottle-collar"></div>
+                <div class="bottle-body">
+                  <div class="glass-specular"></div>
+                  <div class="liquid-chamber">
+                    <span class="bottle-brand-vertical">AURA</span>
+                    <span class="bottle-shade-label">05 קקאו</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="ground-shadow"></div>
+          </div>
+        </div>
+
+        <aside class="sensory-card"
+          style="--liquid-top: #c47e54; --liquid-mid: #784121; --liquid-bottom: #381906;">
+          <div class="swatch-preview">
+            <div class="swatch-smear"></div>
+            <div class="swatch-meta">
+              <h4>גנאש קקאו חמים</h4>
+              <p>ברק שוקולד עשיר ומפסל</p>
+            </div>
+          </div>
+          <div class="meter-group">
+            <div class="meter-row">
+              <div class="meter-labels"><span>רמת ברק 6D</span><span>95%</span></div>
+              <div class="meter-track"><div class="meter-fill" style="--fill: 95%;"></div></div>
+            </div>
+            <div class="meter-row">
+              <div class="meter-labels"><span>לחות והזנה</span><span>96%</span></div>
+              <div class="meter-track"><div class="meter-fill" style="--fill: 96%;"></div></div>
+            </div>
+            <div class="meter-row">
+              <div class="meter-labels"><span>עוצמת גוון</span><span>90%</span></div>
+              <div class="meter-track"><div class="meter-fill" style="--fill: 90%;"></div></div>
+            </div>
+          </div>
+        </aside>
+      </section>
+
+    </div>
+  </main>
+
+  <!-- Bottom Navigation Controls -->
+  <nav class="bottom-nav" aria-label="ניווט בין גוונים">
+    <button class="nav-btn" id="prevBtn" type="button" aria-label="הגוון הקודם">
+      <span>→</span>
+      <span>הקודם</span>
+    </button>
+
+    <div class="slide-indicators" role="tablist" aria-label="בחירת גוון">
+      <button class="dot-btn active" type="button" data-slide="0" aria-label="דבש"></button>
+      <button class="dot-btn" type="button" data-slide="1" aria-label="אפרסק"></button>
+      <button class="dot-btn" type="button" data-slide="2" aria-label="פירות יער"></button>
+      <button class="dot-btn" type="button" data-slide="3" aria-label="רימון"></button>
+      <button class="dot-btn" type="button" data-slide="4" aria-label="קקאו"></button>
+    </div>
+
+    <button class="nav-btn" id="nextBtn" type="button" aria-label="הגוון הבא">
+      <span>הבא</span>
+      <span>←</span>
+    </button>
+  </nav>
+
+  <script>
+    (function () {
+      const slides = Array.from(document.querySelectorAll('.slide'));
+      const dots = Array.from(document.querySelectorAll('.dot-btn'));
+      const prevBtn = document.getElementById('prevBtn');
+      const nextBtn = document.getElementById('nextBtn');
+      const root = document.documentElement;
+
+      let currentIndex = 0;
+      let isTransitioning = false;
+      const TRANSITION_LOCK_MS = 820;
+
+      function applySlideTheme(slideEl) {
+        const ds = slideEl.dataset;
+        root.style.setProperty('--bg-primary', ds.bgPrimary);
+        root.style.setProperty('--bg-secondary', ds.bgSecondary);
+        root.style.setProperty('--bg-accent', ds.bgAccent);
+        root.style.setProperty('--text-dark', ds.textDark);
+        root.style.setProperty('--text-muted', ds.textMuted);
+        root.style.setProperty('--tube-color-1', ds.tube1);
+        root.style.setProperty('--tube-color-2', ds.tube2);
+        root.style.setProperty('--tube-glow', ds.glow);
+      }
+
+      function goToSlide(targetIndex) {
+        if (isTransitioning || targetIndex === currentIndex) return;
+        isTransitioning = true;
+
+        const outgoingSlide = slides[currentIndex];
+        const incomingSlide = slides[targetIndex];
+
+        // Trigger gravity drop on current slide ingredients & product
+        outgoingSlide.classList.remove('active');
+        outgoingSlide.classList.add('exiting');
+
+        // Update theme colors smoothly
+        applySlideTheme(incomingSlide);
+
+        // Update active navigation indicator
+        dots.forEach((dot, idx) => {
+          dot.classList.toggle('active', idx === targetIndex);
+        });
+
+        // After brief gravity head-start, float in the next slide's product & fruits
+        setTimeout(() => {
+          incomingSlide.classList.remove('exiting');
+          incomingSlide.classList.add('active');
+        }, 220);
+
+        setTimeout(() => {
+          outgoingSlide.classList.remove('exiting');
+          currentIndex = targetIndex;
+          isTransitioning = false;
+        }, TRANSITION_LOCK_MS);
+      }
+
+      nextBtn.addEventListener('click', () => {
+        const nextIndex = (currentIndex + 1) % slides.length;
+        goToSlide(nextIndex);
+      });
+
+      prevBtn.addEventListener('click', () => {
+        const prevIndex = (currentIndex - 1 + slides.length) % slides.length;
+        goToSlide(prevIndex);
+      });
+
+      dots.forEach((dot) => {
+        dot.addEventListener('click', () => {
+          const target = Number(dot.dataset.slide);
+          goToSlide(target);
+        });
+      });
+
+      // Keyboard navigation support (RTL aware)
+      window.addEventListener('keydown', (e) => {
+        if (e.key === 'ArrowLeft') {
+          goToSlide((currentIndex + 1) % slides.length);
+        } else if (e.key === 'ArrowRight') {
+          goToSlide((currentIndex - 1 + slides.length) % slides.length);
+        }
+      });
+
+      // Subtle interactive 6D parallax tilt on mouse move
+      const stage = document.getElementById('presentationStage');
+      window.addEventListener('pointermove', (e) => {
+        const xNorm = (e.clientX / window.innerWidth - 0.5) * 2;
+        const yNorm = (e.clientY / window.innerHeight - 0.5) * 2;
+        stage.style.transform = `rotateY(${xNorm * 5}deg) rotateX(${-yNorm * 5}deg)`;
+      });
+
+      // Audio Controller (Controls <audio> tag + gentle WebAudio ambient pad fallback if external placeholder URL is offline)
+      const audioEl = document.getElementById('ambientAudio');
+      const audioToggleBtn = document.getElementById('audioToggleBtn');
+      const audioStatusText = document.getElementById('audioStatusText');
+
+      let isPlaying = false;
+      let audioCtx = null;
+      let synthGain = null;
+
+      function startFallbackAmbientSynth() {
+        if (!audioCtx) {
+          const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+          if (!AudioContextClass) return;
+          audioCtx = new AudioContextClass();
+          synthGain = audioCtx.createGain();
+          synthGain.gain.setValueAtTime(0.001, audioCtx.currentTime);
+          synthGain.connect(audioCtx.destination);
+
+          // Warm dreamy major-9th chord frequencies
+          const freqs = [220, 277.18, 329.63, 415.3, 493.88];
+          freqs.forEach((f, i) => {
+            const osc = audioCtx.createOscillator();
+            const filter = audioCtx.createBiquadFilter();
+            osc.type = i % 2 === 0 ? 'sine' : 'triangle';
+            osc.frequency.setValueAtTime(f, audioCtx.currentTime);
+            filter.type = 'lowpass';
+            filter.frequency.setValueAtTime(620, audioCtx.currentTime);
+            osc.connect(filter);
+            filter.connect(synthGain);
+            osc.start();
+          });
+        }
+        if (audioCtx.state === 'suspended') {
+          audioCtx.resume();
+        }
+        synthGain.gain.cancelScheduledValues(audioCtx.currentTime);
+        synthGain.gain.linearRampToValueAtTime(0.045, audioCtx.currentTime + 0.8);
+      }
+
+      function stopFallbackAmbientSynth() {
+        if (audioCtx && synthGain) {
+          synthGain.gain.cancelScheduledValues(audioCtx.currentTime);
+          synthGain.gain.linearRampToValueAtTime(0.0001, audioCtx.currentTime + 0.4);
+        }
+      }
+
+      audioToggleBtn.addEventListener('click', () => {
+        if (!isPlaying) {
+          audioEl.volume = 0.35;
+          const playPromise = audioEl.play();
+          if (playPromise !== undefined) {
+            playPromise.catch(() => {
+              startFallbackAmbientSynth();
+            });
+          }
+          isPlaying = true;
+          audioToggleBtn.classList.add('playing');
+          audioStatusText.textContent = 'השתק מוזיקה';
+        } else {
+          audioEl.pause();
+          stopFallbackAmbientSynth();
+          isPlaying = false;
+          audioToggleBtn.classList.remove('playing');
+          audioStatusText.textContent = 'הפעל צליל אווירה';
+        }
+      });
+
+      // Initialize first slide theme
+      applySlideTheme(slides[0]);
+    })();
+  </script>
+</body>
+</html>
