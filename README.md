@@ -6,18 +6,18 @@
 
 | Deliverable | File |
 | ----------- | ---- |
-| Presentation (final deck) | [`src/deck-v4.html`](src/deck-v4.html) |
-| 3D launch film | [`src/film-v3.html`](src/film-v3.html) |
-| Python simulation | [`src/simulation.py`](src/simulation.py) |
+| Presentation (final deck) | [`final/deck.html`](final/deck.html) |
+| 3D launch film | [`final/film.html`](final/film.html) |
+| Python simulation | [`final/simulation.py`](final/simulation.py) |
 
 **How to view:**
 
 1. Download the repository (Code → Download ZIP) or clone it: `git clone https://github.com/daherraneem/ex01-marketing.git`
-2. Open [`src/deck-v4.html`](src/deck-v4.html) in Chrome. The film is on Slide 10 and the Python simulation is on Slide 11.
+2. Open [`final/deck.html`](final/deck.html) in Chrome. The film is on Slide 10 and the Python simulation is on Slide 11.
 3. An internet connection is needed: the Python simulation runs in the browser with Pyodide, which loads from the internet (so do the fonts and Three.js).
 4. The film starts with the Play button (▶ הפעל). Turn the sound on.
 
-Older versions (`deck-v1`–`v3`, `film-v1`, `film-v2`) are kept on purpose to show our development process.
+[`archive/`](archive/) keeps our earlier versions to show the development process.
 
 ---
 
@@ -32,7 +32,8 @@ Older versions (`deck-v1`–`v3`, `film-v1`, `film-v2`) are kept on purpose to s
 | Folder                | Purpose                                      |
 | --------------------- | -------------------------------------------- |
 | `prompts/`            | Prompts used with the AI agent, one per step |
-| `src/`                | Source code                                  |
+| `final/`              | The final submission: deck, film, simulation |
+| `archive/`            | Earlier deck and film versions               |
 | `assets/screenshots/` | Screenshots for documentation                |
 | `docs/`               | Project documentation                        |
 | `PRD.md`              | Product Requirements Document (the plan)     |
@@ -49,23 +50,24 @@ Older versions (`deck-v1`–`v3`, `film-v1`, `film-v2`) are kept on purpose to s
 - **2026-11-03** – Deck v4 (`src/deck-v4.html`): updated Slide 7 by removing the content about Hailey Bieber and replacing it with a bridge slide ("מההשראה למותג שלנו") connecting Rhode's food-inspired marketing insight to our original brand, AURA. Prompt saved in `prompts/10-slide7-update.md` (Raghad).
 - **2026-11-03** – Prepared the repo for submission: added the "Final Submission" section at the top of the README (final files, how to view), checked that the final deck (`src/deck-v4.html`) embeds `film-v3.html` on Slide 10 and runs the Python simulation on Slide 11, and tagged the commit `submission-ex01` (Raneem).
 - **2026-11-03** – Final fixes: film length in `PRD.md` changed to 20–25 s (the final film is 24 s); renamed the duplicate prompt `06-python-simulation.md` to `11-python-simulation.md`; changed "Honey Glaze" to "Golden Honey Glaze" on Slide 11 of `src/deck-v4.html` and in `src/simulation.py` (Raneem).
+- **2026-11-03** – Organized the repo with `git mv` (history kept): the final files are now in `final/` (`deck.html`, `film.html`, `simulation.py`) and the earlier deck and film versions are in `archive/`. Updated the film and simulation paths in `final/deck.html`, pointed the archived decks to `../final/film.html`, and updated the README (Raneem).
 
 ## Film Versions
 
 | Version | File | What it is | Why we changed it | Status |
 | ------- | ---- | ---------- | ----------------- | ------ |
-| v1 | `src/film-v1.html` | First version – one AURA tube; the auras of all the flavors flow into it and fill it with color. | – (starting point) | Replaced by v2 |
-| v2 | `src/film-v2.html` | 5 tubes, each with its own flavor and food, and a more natural look (glossy materials, soft light and shadows, realistic cosmetic packaging). | To match our concept that every lip tint has its own flavor, like in Raghad's deck. | **Not selected** – all tubes appear together; we want each shade to have its own moment. |
-| v3 | `src/film-v3.html` | Each shade alone with its own food (3.5 s per shade), Raghad's exact shades (names, colors, foods) and deck style (cream-peach background with aura circles, her fonts), a more realistic look (glass with reflections, soft shadows, gold collars, glossy foods) and a soundtrack with a musical signature for each shade. | So every lip tint gets its own moment, and the film and the deck look like one campaign. | **Selected – final version** |
+| v1 | `archive/film-v1.html` | First version – one AURA tube; the auras of all the flavors flow into it and fill it with color. | – (starting point) | Replaced by v2 |
+| v2 | `archive/film-v2.html` | 5 tubes, each with its own flavor and food, and a more natural look (glossy materials, soft light and shadows, realistic cosmetic packaging). | To match our concept that every lip tint has its own flavor, like in Raghad's deck. | **Not selected** – all tubes appear together; we want each shade to have its own moment. |
+| v3 | `final/film.html` (was `film-v3.html`) | Each shade alone with its own food (3.5 s per shade), Raghad's exact shades (names, colors, foods) and deck style (cream-peach background with aura circles, her fonts), a more realistic look (glass with reflections, soft shadows, gold collars, glossy foods) and a soundtrack with a musical signature for each shade. | So every lip tint gets its own moment, and the film and the deck look like one campaign. | **Selected – final version** |
 
 ## Deck Versions
 
 | Version | File | What it is | Why we changed it | Status |
 | ------- | ---- | ---------- | ----------------- | ------ |
-| v1 | `src/deck-v1.html` | First presentation – 5 interactive 6D floating lip tint shade slides in Hebrew RTL with ambient audio and sensory specs. | – (starting point) | Replaced by v2 |
-| v2 | `src/deck-v2.html` | Added the Rhode case study & AURA campaign strategy slides plus Slide 11 with the live Python A/B simulation (`src/simulation.py`) running in the browser via Pyodide. | To back our sensory marketing insight with a 1,000-customer simulation chart directly inside the deck, as required by the PRD. | Replaced by v3 |
-| v3 | `src/deck-v3.html` | Moved the deck into `src/` alongside `film-v3.html` and embedded the final 3D launch film (`src/film-v3.html`) on Slide 10 using an `<iframe>` with `allow="autoplay; fullscreen"`. | Because the old relative path pointed to the wrong folder and lacked audio/fullscreen permissions; placing both files in `src/` makes the embedded 3D film play seamlessly inside Slide 10. | Replaced by v4 |
-| v4 | `src/deck-v4.html` | Slide 7: removed the content about Hailey Bieber and replaced it with a bridge slide (from inspiration to our own brand). | Our project focuses on our original brand, AURA; Rhode is used only as inspiration. | **Selected – final version** |
+| v1 | `archive/deck-v1.html` | First presentation – 5 interactive 6D floating lip tint shade slides in Hebrew RTL with ambient audio and sensory specs. | – (starting point) | Replaced by v2 |
+| v2 | `archive/deck-v2.html` | Added the Rhode case study & AURA campaign strategy slides plus Slide 11 with the live Python A/B simulation (`src/simulation.py`) running in the browser via Pyodide. | To back our sensory marketing insight with a 1,000-customer simulation chart directly inside the deck, as required by the PRD. | Replaced by v3 |
+| v3 | `archive/deck-v3.html` | Moved the deck into `src/` alongside `film-v3.html` and embedded the final 3D launch film (`src/film-v3.html`) on Slide 10 using an `<iframe>` with `allow="autoplay; fullscreen"`. | Because the old relative path pointed to the wrong folder and lacked audio/fullscreen permissions; placing both files in `src/` makes the embedded 3D film play seamlessly inside Slide 10. | Replaced by v4 |
+| v4 | `final/deck.html` (was `deck-v4.html`) | Slide 7: removed the content about Hailey Bieber and replaced it with a bridge slide (from inspiration to our own brand). | Our project focuses on our original brand, AURA; Rhode is used only as inspiration. | **Selected – final version** |
 
 ## Screenshots
 
@@ -73,7 +75,7 @@ Older versions (`deck-v1`–`v3`, `film-v1`, `film-v2`) are kept on purpose to s
 
 ![Deck preview – Golden Honey Glaze slide](assets/screenshots/deck-preview.png)
 
-**Deck Slide 10 (Embedded 3D Film)** – `src/film-v3.html` playing inside Slide 10 of `src/deck-v3.html`:
+**Deck Slide 10 (Embedded 3D Film)** – the film (`final/film.html`, then `film-v3.html`) playing inside Slide 10 of deck v3 (now `archive/deck-v3.html`):
 
 ![Deck Slide 10 – embedded 3D launch film](assets/screenshots/deck-slide10-film.png)
 

@@ -1373,7 +1373,7 @@ addEventListener('keydown', e => {
   if ((e.key === ' ' || e.key === 'Enter') && state === 'idle') { e.preventDefault(); play(); }
 });
 
-// dev aid: film-v3.html?t=14.5 freezes on that moment (no sound)
+// dev aid: film.html?t=14.5 freezes on that moment (no sound)
 const qT = new URLSearchParams(location.search).get('t');
 if (qT !== null && !isNaN(+qT)) { state = 'seek'; seekT = +qT; intro.classList.add('hide'); }
 
