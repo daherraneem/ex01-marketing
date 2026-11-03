@@ -71,7 +71,7 @@ The technical requirements are only the entry threshold. The lecturer grades pro
 | # | Deliverable | Owner |
 |---|---|---|
 | D1 | HTML presentation (Hebrew, RTL, up to 15 slides) | Raghad Rabah |
-| D2 | 3D animated ad (Three.js, 15–20 s) embedded in D1 | Raneem Daher |
+| D2 | 3D animated ad (Three.js, 20–25 s) embedded in D1 | Raneem Daher |
 | D3 | Python simulation (1,000 customers) run from inside D1 | Raghad Rabah |
 | D4 | Project documentation: `PRD.md`, `README.md`, `prompts/`, screenshots, red-team review | Both |
 
@@ -143,7 +143,7 @@ The technical requirements are only the entry threshold. The lecturer grades pro
 
 ### 6.1 Technical requirements
 - **One HTML file** (`src/film-vN.html`), with Three.js loaded from a CDN (ES module import).
-- **Length 15–20 seconds**, on a timeline. Plays from start to end and then shows "Replay".
+- **Length 20–25 seconds**, on a timeline (the final film, v3, is 24 s). Plays from start to end and then shows "Replay".
 - **Built from objects, not images:** the tube, honey drop, peach, berries, pomegranate and cocoa bean are made from Three.js geometry and materials. The glowing "aura" in each shade color uses emissive materials, additive sprites or a bloom post-process.
 - **Hebrew captions** in an HTML overlay (`dir="rtl"`), timed to the scenes.
 - **Sound effects** made with the Web Audio API (synthesized chimes, whoosh, sparkle). They are original, with no licensing issues and no audio files. Browsers block autoplay with sound, so the film starts with a **"▶ הפעל" (Play)** button.
@@ -164,7 +164,7 @@ The technical requirements are only the entry threshold. The lecturer grades pro
 
 ### 6.3 Acceptance criteria – D2
 - [ ] Runs as one HTML file in Chrome and Edge without console errors, at a steady frame rate on a regular laptop.
-- [ ] Total length is between 15 and 20 seconds, and the scenes follow the storyboard.
+- [ ] Total length is between 20 and 25 seconds, and the scenes follow the storyboard.
 - [ ] Five food objects, each with an aura in its exact shade HEX.
 - [ ] Hebrew captions render RTL and are readable. The English slogan is BiDi-isolated.
 - [ ] At least four distinct sound effects, in sync with the scenes. The film starts with a Play click and has Replay at the end.

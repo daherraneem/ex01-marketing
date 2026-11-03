@@ -9,7 +9,7 @@ customers = 1000
 
 # 2. סיכוי הרכישה (הנחת העבודה של שיווק חושי)
 prob_shelf_a = 0.15  # מדף א': שמות גוונים מספריים (Shade #01)
-prob_shelf_b = 0.45  # מדף ב': מותג AURA עם שמות מאכלים (Honey Glaze)
+prob_shelf_b = 0.45  # מדף ב': מותג AURA עם שמות מאכלים (Golden Honey Glaze)
 
 # ביצוע הסימולציה
 sales_a = sum([1 for _ in range(customers) if random.random() < prob_shelf_a])
