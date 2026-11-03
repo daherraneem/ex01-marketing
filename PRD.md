@@ -14,7 +14,7 @@
 
 A Hebrew HTML presentation, **"We learned from Rhode, and built our own brand"**:
 
-- **Part A** – a factual case study of how Rhode uses food in its marketing, and of its Lip Tint.
+- **Part A** – one bridge slide on how Rhode uses food in its marketing: 2–3 short facts, each with a public source. We chose to keep Part A short and focus on our own brand, AURA.
 - **Part B** – a launch campaign for **AURA**, our own fictional lip tint brand. It uses the same insight in an original way.
 
 The presentation embeds a **3D animated ad** (Three.js). It also runs a **Python simulation** that tests the campaign's main idea with numbers: food names make people want to buy.
@@ -111,9 +111,9 @@ The technical requirements are only the entry threshold. The lecturer grades pro
 |---|---|---|---|
 | 1 | פתיחה – Opening | AURA, slogan, team names | – |
 | 2 | השאלה – The question | Why do we "want to eat" beauty products? | A |
-| 3 | Case Study: Rhode | Who the brand is and what its story is (facts + sources) | A |
-| 4 | Rhode ואוכל | How the brand uses food in names and marketing | A |
-| 5 | ה-Lip Tint של Rhode | What stands out in the product and why it works | A |
+| ~~3~~ | ~~Case Study: Rhode~~ | Replaced by one bridge slide, see the note below | A |
+| ~~4~~ | ~~Rhode ואוכל~~ | Replaced by one bridge slide, see the note below | A |
+| ~~5~~ | ~~ה-Lip Tint של Rhode~~ | Replaced by one bridge slide, see the note below | A |
 | 6 | התובנה – The insight | Food-based sensory marketing | A→B |
 | 7 | בריף הקמפיין – Campaign brief | Objective, audience, key message, deliverables | B |
 | 8 | מציגים: AURA | Name, meaning, concept + **positioning statement** | B |
@@ -126,6 +126,8 @@ The technical requirements are only the entry threshold. The lecturer grades pro
 | 15 | תודה – Thank you | Slogan, team, link to the GitHub repo | – |
 
 **Changes from the concept brief:** we added a campaign brief slide (7), a positioning statement (slide 8) and pricing (slide 14). With these, the deck covers the full Part B list (brief, persona, insight, positioning, ad, pricing/KPIs) and still has only 15 slides.
+
+**Change after the red team review:** Part A is **one bridge slide** ("מההשראה למותג שלנו", slide 7 in the final deck) with 3 short facts about Rhode's food-inspired marketing, each with a public source (Glossy, NewBeauty), instead of the three Rhode slides planned above. We chose this because the project is about our own brand, AURA, and Rhode is only the inspiration. The final deck has 12 slides.
 
 ### 5.3 Acceptance criteria – D1
 - [ ] One HTML file opens in Chrome and Edge without console errors.
@@ -182,24 +184,24 @@ Does a food name for a shade increase the wish to buy?
 - **1,000 virtual customers.** Each one sees two shelves with the same five colors:
   - **Shelf A (numbered):** `Shade #01` … `Shade #05`
   - **Shelf B (food names):** `Golden Honey Glaze` … `Silk Cocoa Glaze`
-- Each customer has a base purchase probability (with random variation between customers). On Shelf B it goes up by a **"name effect"** parameter, which is a demo assumption and not real data.
-- Output: the number of buyers per shelf, buyers per shade, and estimated revenue (buyers × the fictional price from slide 14).
-- Fixed random seed by default, so results are reproducible. A "new run" option gives a fresh seed.
-- **Chart:** a bar chart comparing Shelf A and Shelf B (buyers + revenue), in AURA colors.
+- **1,000 customers per shelf.** On Shelf A each customer buys with a base probability of **10%**. On Shelf B the probability goes up by the **"name effect"** (default **20%**, relative, so 10% → 12%). Both numbers are demo assumptions, not real data, and the slide says so.
+- Output: the number of buyers per shelf.
+- Fixed random seed, so the same name effect always gives the same result.
+- **Chart:** a bar chart comparing Shelf A and Shelf B (buyers), in AURA colors, with Hebrew text in the correct right-to-left order.
 
 ### 7.3 How the deck runs it
-- `src/simulation.py` is the source of truth. It also runs locally (`python src/simulation.py`) and saves the chart as a PNG.
+- `final/simulation.py` is the source of truth. It also runs locally (`python final/simulation.py`) and saves the chart as a PNG.
 - Slide 12 runs **the same code in the browser with Pyodide**: a **"הרץ סימולציה" (Run)** button, a loading indicator while Pyodide loads, then the chart.
-- A **slider** for the name effect (for example 0%–30%). Moving it and pressing Run again updates the chart.
+- A **slider** for the name effect (0%–30%, default 20%). After the first run, moving it re-runs the simulation and updates the chart.
 - The Python code is embedded in the deck (identical to `simulation.py`). This keeps the deck a single file that works from `file://` without a local server.
 
 ### 7.4 Acceptance criteria – D3
-- [ ] `python src/simulation.py` runs with no errors and writes a chart PNG.
+- [ ] `python final/simulation.py` runs with no errors and writes a chart PNG.
 - [ ] In the deck, pressing "Run" produces the chart within a reasonable time (a loading message is shown during the Pyodide download).
 - [ ] The slider changes the name effect, and the chart changes to match (effect 0 → shelves roughly equal).
-- [ ] Exactly 1,000 customers are simulated. With the same seed, the result is the same every time.
+- [ ] Exactly 1,000 customers per shelf are simulated. With the same seed, the result is the same every time.
 - [ ] Slide 12 says clearly (in Hebrew) that the name effect is an assumption for the demo and not a real finding.
-- [ ] The embedded code is identical to `src/simulation.py`.
+- [ ] The embedded code is identical to `final/simulation.py`.
 
 ---
 

@@ -816,27 +816,123 @@
     .slide-indicators {
       display: flex;
       align-items: center;
-      gap: 10px;
+      gap: 0;
       padding: 0 8px;
     }
 
+    /* navigation dots: 16px visible dot inside a 36 × 44px click/touch area */
     .dot-btn {
-      width: 12px;
-      height: 12px;
-      border-radius: 999px;
+      position: relative;
+      width: 36px;
+      height: 44px;
+      padding: 0;
       border: none;
-      background: rgba(0, 0, 0, 0.22);
+      background: transparent;
       cursor: pointer;
+      transition: width 0.35s cubic-bezier(0.22, 1, 0.36, 1);
+    }
+
+    .dot-btn::before {
+      content: '';
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      width: 16px;
+      height: 16px;
+      border-radius: 999px;
+      background: rgba(0, 0, 0, 0.24);
+      transform: translate(-50%, -50%);
       transition: width 0.35s cubic-bezier(0.22, 1, 0.36, 1), background 0.35s ease, transform 0.25s ease;
     }
 
     .dot-btn.active {
-      width: 34px;
+      width: 52px;
+    }
+
+    .dot-btn.active::before {
+      width: 40px;
       background: var(--text-dark);
     }
 
-    .dot-btn:hover {
-      transform: scale(1.2);
+    .dot-btn:hover::before {
+      transform: translate(-50%, -50%) scale(1.15);
+    }
+
+    .dot-btn:focus-visible {
+      outline: 2px solid var(--text-dark);
+      outline-offset: -4px;
+      border-radius: 999px;
+    }
+
+    /* slides 6–7: plain insight lines and Rhode facts with sources */
+    .insight-list {
+      list-style: none;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      font-size: 0.95rem;
+      line-height: 1.5;
+      color: var(--text-dark);
+    }
+
+    .insight-list li {
+      background: rgba(255, 255, 255, 0.45);
+      border-radius: 14px;
+      padding: 8px 12px;
+    }
+
+    .fact-list {
+      list-style: none;
+      margin: 0;
+      padding: 0;
+      text-align: right;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      font-size: 0.98rem;
+      line-height: 1.6;
+      color: var(--text-dark);
+    }
+
+    .fact-src {
+      display: block;
+      font-size: 0.78rem;
+      opacity: 0.8;
+    }
+
+    .fact-src a {
+      color: inherit;
+    }
+
+    /* slide 11: name-effect slider */
+    .sim-controls {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      width: 100%;
+      max-width: 460px;
+      font-size: 0.95rem;
+      font-weight: 700;
+      color: var(--text-dark);
+    }
+
+    .sim-controls input[type="range"] {
+      flex: 1;
+      accent-color: var(--text-dark);
+      cursor: pointer;
+    }
+
+    .sim-controls output {
+      min-width: 3.2em;
+      text-align: center;
+    }
+
+    .sim-assumption {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      margin-top: -4px;
     }
 
     /* Responsive adjustments */
@@ -1052,7 +1148,7 @@
           <h1 class="shade-title">דבש טהור</h1>
           <div class="shade-subtitle">GOLDEN HONEY GLAZE</div>
           <p class="shade-description">
-            ברק ענברי עמוק העוטף את השפתיים בזוהר זהוב-חמים של דבש פרחי בר. מעניק אפקט זכוכית תלת-ממדי, הזנה עשירה ומראה שפתיים מלאות וקורנות באור טבעי.
+            ברק ענברי עמוק שנמס על השפתיים כמו דבש חם, ועוטף אותן בזוהר זהוב של דבש פרחי בר. מעניק אפקט זכוכית תלת-ממדי, הזנה עשירה ומראה שפתיים מלאות וקורנות באור טבעי.
           </p>
         </div>
 
@@ -1132,7 +1228,7 @@
           <h1 class="shade-title">אפרסק עסיסי</h1>
           <div class="shade-subtitle">VELVET PEACH NECTAR</div>
           <p class="shade-description">
-            נגיעה רעננה של אפרסק בשל שטוף שמש. משלב תת-גוון קורלי-ורדרד המחמיא לכל גוון עור, ומעניק לשפתיים מראה חי, צעיר ומלא ברק קריסטלי רך.
+            נגיעה רעננה של אפרסק בשל שטוף שמש, במרקם משיי וקליל. משלב תת-גוון קורלי-ורדרד המחמיא לכל גוון עור, ומעניק לשפתיים מראה חי, צעיר ומלא ברק קריסטלי רך.
           </p>
         </div>
 
@@ -1212,7 +1308,7 @@
           <h1 class="shade-title">פירות יער</h1>
           <div class="shade-subtitle">BERRY CRUSH ELIXIR</div>
           <p class="shade-description">
-            מיזוג עוצר נשימה של תות שדה מתוק ואוכמניות בר. צובע את השפתיים בגוון ורוד-פטל רווי וחושני עם השתקפות אור מרהיבה שנשארת לאורך שעות.
+            מיזוג עסיסי של תות שדה מתוק ואוכמניות בר, שנמס על השפתיים. צובע את השפתיים בגוון ורוד-פטל רווי וחושני עם השתקפות אור מרהיבה שנשארת לאורך שעות.
           </p>
         </div>
 
@@ -1292,7 +1388,7 @@
           <h1 class="shade-title">רימון רובי</h1>
           <div class="shade-subtitle">RUBY POMEGRANATE JEWEL</div>
           <p class="shade-description">
-            אדום ארגמני עוצמתי בהשראת גרגרי רימון נוצצים כיהלומים. מעניק לשפתיים נוכחות דרמטית, עומק מלכותי וברק זגוגי מהפנט שמאיר את הפנים ברגע.
+            אדום ארגמני עוצמתי בהשראת גרגרי רימון נוצצים כיהלומים. מעניק לשפתיים נוכחות דרמטית בתחושה רכה ומשיית, וברק זגוגי שמאיר את הפנים ברגע.
           </p>
         </div>
 
@@ -1372,7 +1468,7 @@
           <h1 class="shade-title">קקאו קטיפתי</h1>
           <div class="shade-subtitle">SILK COCOA GLAZE</div>
           <p class="shade-description">
-            חום-שוקולד חמים ועמוק בניחוח פולי קקאו קלויים. מעניק לשפתיים מראה ניוד-בראון מתוחכם עם גימור גלוסי עשיר שמדגיש ומפסל את קווי המתאר של השפתיים.
+            חום-שוקולד חמים ועמוק, שנמס כמו שוקולד חם, בניחוח פולי קקאו קלויים. מעניק לשפתיים מראה ניוד-בראון מתוחכם עם גימור גלוסי עשיר שמדגיש ומפסל את קווי המתאר של השפתיים.
           </p>
         </div>
 
@@ -1475,16 +1571,11 @@
               <p>אנשים משלמים על הסיפור</p>
             </div>
           </div>
-          <div class="meter-group">
-            <div class="meter-row">
-              <div class="meter-labels"><span>חיבור רגשי לשם אוכל</span><span>94%</span></div>
-              <div class="meter-track"><div class="meter-fill" style="--fill: 94%;"></div></div>
-            </div>
-            <div class="meter-row">
-              <div class="meter-labels"><span>זכירות המותג ברשתות</span><span>91%</span></div>
-              <div class="meter-track"><div class="meter-fill" style="--fill: 91%;"></div></div>
-            </div>
-          </div>
+          <!-- no made-up percentages: two qualitative points instead -->
+          <ul class="insight-list">
+            <li><strong>שם של מאכל</strong> ← זיכרון, טעם ורגש</li>
+            <li><strong>מראה עסיסי</strong> ← חשק ושיתוף ברשתות</li>
+          </ul>
         </aside>
       </section>
 
@@ -1519,11 +1610,14 @@
 
         <div class="product-stage-center">
           <div class="campaign-card-center">
-            <h3 style="font-size: 1.45rem; font-weight: 800; color: var(--text-dark);">3 נקודות שלמדנו ויישמנו ב-<bdi>AURA</bdi></h3>
-            <ul style="text-align: right; font-size: 1.02rem; line-height: 1.75; color: var(--text-dark); list-style: none;">
-              <li>✨ <strong>1. שם של מאכל יוצר חשק:</strong> למדנו מ-<bdi>Rhode</bdi> ששמות מעולם האוכל הופכים שפתון לחוויה חושית שמעוררת רגש ורצון לקנות.</li>
-              <li>✨ <strong>2. נראות עסיסית שמספרת סיפור:</strong> חיבור ויזואלי בין ברק השפתיים לבין עולם המזון יוצר זכירות מיידית ברשתות החברתיות.</li>
-              <li>✨ <strong>3. הטוויסט המקורי שלנו – <bdi>AURA</bdi>:</strong> לקחנו את התובנה לעולם חדש של <strong>פירות ורכיבים טבעיים שמזינים את הגוף ומעניקים זוהר מבפנים</strong> (דבש, אפרסק, פירות יער, רימון וקקאו).</li>
+            <h3 style="font-size: 1.4rem; font-weight: 800; color: var(--text-dark);">3 עובדות: איך <bdi>Rhode</bdi> משתמשת באוכל</h3>
+            <ul class="fact-list">
+              <li>🍓 <strong>אוגוסט 2023:</strong> טעם <bdi>Strawberry Glaze</bdi> ל-<bdi>Peptide Lip Treatment</bdi>, בשיתוף עם <bdi>Krispy Kreme</bdi>, שהחזירה לכמה ימים את הדונאט באותו שם.
+                <span class="fact-src">מקור: <a href="https://www.glossy.co/pop/with-new-strawberry-glaze-flavor-rhode-closes-in-on-1-million-peptide-lip-treatments-sold/" target="_blank" rel="noopener"><bdi dir="ltr">Glossy, 28.8.2023</bdi></a></span></li>
+              <li>💄 <strong>מיליון שפופרות:</strong> לפי אותה כתבה, המותג צפה למכור את השפופרת המיליון של מוצר השפתיים עד ספטמבר 2023.
+                <span class="fact-src">מקור: <a href="https://www.glossy.co/pop/with-new-strawberry-glaze-flavor-rhode-closes-in-on-1-million-peptide-lip-treatments-sold/" target="_blank" rel="noopener"><bdi dir="ltr">Glossy, 28.8.2023</bdi></a></span></li>
+              <li>☕ <strong>ספטמבר 2023:</strong> קו <bdi>Peptide Lip Tint</bdi> הושק עם גוונים בשמות של אוכל ושתייה: <bdi>Espresso</bdi>, <bdi>Raspberry Jelly</bdi> ו-<bdi>Toast</bdi> (לצד <bdi>Ribbon</bdi>).
+                <span class="fact-src">מקור: <a href="https://www.newbeauty.com/rhode-peptide-lip-tint-launch" target="_blank" rel="noopener"><bdi dir="ltr">NewBeauty, 21.9.2023</bdi></a></span></li>
             </ul>
           </div>
         </div>
@@ -1532,20 +1626,15 @@
           <div class="swatch-preview">
             <div class="swatch-smear"></div>
             <div class="swatch-meta">
-              <h4>מהשראה ליצירה מקורית</h4>
-              <p>התובנה שהולידה את <bdi>AURA</bdi></p>
+              <h4>מה לקחנו ל-<bdi>AURA</bdi></h4>
+              <p>התובנה, לא העיצוב</p>
             </div>
           </div>
-          <div class="meter-group">
-            <div class="meter-row">
-              <div class="meter-labels"><span>שיווק חושי מבוסס אוכל</span><span>96%</span></div>
-              <div class="meter-track"><div class="meter-fill" style="--fill: 96%;"></div></div>
-            </div>
-            <div class="meter-row">
-              <div class="meter-labels"><span>מקוריות המותג <bdi>AURA</bdi></span><span>100%</span></div>
-              <div class="meter-track"><div class="meter-fill" style="--fill: 100%;"></div></div>
-            </div>
-          </div>
+          <!-- what we learned (no made-up percentages) -->
+          <ul class="insight-list">
+            <li><strong>למדנו:</strong> שם של מאכל יוצר חשק</li>
+            <li><strong>הטוויסט שלנו:</strong> פירות ורכיבים טבעיים שמזינים – דבש, אפרסק, פירות יער, רימון וקקאו</li>
+          </ul>
         </aside>
       </section>
 
@@ -1582,14 +1671,14 @@
           <div class="campaign-card-center">
             <h3 style="font-size: 1.45rem; font-weight: 800; color: var(--text-dark);">משפט מיצוב (<bdi>Positioning Statement</bdi>)</h3>
             <p style="font-size: 1.06rem; line-height: 1.7; color: var(--text-dark);">
-              עבור צעירות וסטודנטיות המחפשות מראה טבעי, רענן וזוהר ללא מאמץ, <bdi>AURA Lip Tint</bdi> הוא שפתון לחות שקוף-עסיסי המעניק לשפתיים הילה קורנת בהשראת פירות ורכיבים מהטבע – כי הזוהר שלך מתחיל ממה שמזין אותך.
+              עבור צעירות וסטודנטיות המחפשות מראה טבעי, רענן וזוהר ללא מאמץ, <bdi>AURA Lip Tint</bdi> הוא שפתון לחות שקוף-עסיסי, <strong>במרקם נמס, משיי ולא דביק</strong>, המעניק לשפתיים הילה קורנת בהשראת פירות ורכיבים מהטבע – כי הזוהר שלך מתחיל ממה שמזין אותך.
             </p>
             <div style="display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; margin-top: 6px;">
-              <span style="background:#E8A33D; color:#fff; padding:5px 12px; border-radius:999px; font-size:0.82rem; font-weight:700;"><bdi>Honey Glaze</bdi></span>
-              <span style="background:#F4A582; color:#381810; padding:5px 12px; border-radius:999px; font-size:0.82rem; font-weight:700;"><bdi>Peach Nectar</bdi></span>
-              <span style="background:#A3214B; color:#fff; padding:5px 12px; border-radius:999px; font-size:0.82rem; font-weight:700;"><bdi>Berry Juice</bdi></span>
-              <span style="background:#C0283A; color:#fff; padding:5px 12px; border-radius:999px; font-size:0.82rem; font-weight:700;"><bdi>Pomegranate Drop</bdi></span>
-              <span style="background:#7A4A3A; color:#fff; padding:5px 12px; border-radius:999px; font-size:0.82rem; font-weight:700;"><bdi>Cocoa Kiss</bdi></span>
+              <span style="background:#E69217; color:#fff; padding:5px 12px; border-radius:999px; font-size:0.82rem; font-weight:700;"><bdi>Golden Honey Glaze</bdi></span>
+              <span style="background:#F26C4B; color:#fff; padding:5px 12px; border-radius:999px; font-size:0.82rem; font-weight:700;"><bdi>Velvet Peach Nectar</bdi></span>
+              <span style="background:#D42663; color:#fff; padding:5px 12px; border-radius:999px; font-size:0.82rem; font-weight:700;"><bdi>Berry Crush Elixir</bdi></span>
+              <span style="background:#BA1128; color:#fff; padding:5px 12px; border-radius:999px; font-size:0.82rem; font-weight:700;"><bdi>Ruby Pomegranate Jewel</bdi></span>
+              <span style="background:#784121; color:#fff; padding:5px 12px; border-radius:999px; font-size:0.82rem; font-weight:700;"><bdi>Silk Cocoa Glaze</bdi></span>
             </div>
           </div>
         </div>
@@ -1602,16 +1691,12 @@
               <p>קרם, זהב-דבש ושזיף עמוק</p>
             </div>
           </div>
-          <div class="meter-group">
-            <div class="meter-row">
-              <div class="meter-labels"><span>מקוריות המותג</span><span>100%</span></div>
-              <div class="meter-track"><div class="meter-fill" style="--fill: 100%;"></div></div>
-            </div>
-            <div class="meter-row">
-              <div class="meter-labels"><span>חוויה חושית טבעית</span><span>97%</span></div>
-              <div class="meter-track"><div class="meter-fill" style="--fill: 97%;"></div></div>
-            </div>
-          </div>
+          <!-- no made-up percentages: the brand palette itself -->
+          <ul class="insight-list">
+            <li><strong>קרם</strong> – רך, חם וטבעי</li>
+            <li><strong>זהב-דבש</strong> – זוהר ועסיסיות</li>
+            <li><strong>שזיף עמוק</strong> – טקסט וניגודיות</li>
+          </ul>
         </aside>
       </section>
 
@@ -1695,7 +1780,7 @@
             <span>שקף 10 • סרטון ההשקה התלת-ממדי (<bdi>Three.js</bdi>)</span>
           </div>
           <h1 class="shade-title">הפרסומת: <bdi>AURA 3D</bdi></h1>
-          <div class="shade-subtitle"><bdi>20-SECOND 3D ANIMATED LAUNCH FILM</bdi></div>
+          <div class="shade-subtitle"><bdi>24-SECOND 3D ANIMATED LAUNCH FILM</bdi></div>
           <p class="shade-description">
             סרטון אנימציה תלת-ממדי מקורי הבנוי כולו מאובייקטים גיאומטריים ב-<bdi>Three.js</bdi> עם כיתוביות בעברית ואפקטי סאונד ב-<bdi>Web Audio API</bdi>. מציג את חמשת המאכלים וההילות שלהם המתמזגים לזוהר של <bdi>AURA</bdi>.
           </p>
@@ -1758,15 +1843,21 @@
           <h1 class="shade-title">סימולציית <bdi>A/B</bdi></h1>
           <div class="shade-subtitle"><bdi>1,000 VIRTUAL CUSTOMERS SIMULATION</bdi></div>
           <p class="shade-description">
-            האם שם של מאכל באמת מגדיל את הרצון לקנות? הקוד ב-<bdi>simulation.py</bdi> מריץ בדפדפן מודל של 1,000 לקוחות המשווה בין <strong>מדף א׳</strong> (שמות מספריים <bdi>Shade #01</bdi>) לבין <strong>מדף ב׳ – <bdi>AURA</bdi></strong> (שמות מאכלים כגון <bdi>Golden Honey Glaze</bdi>).<br>
-            <small style="opacity:0.85;">* גודל "אפקט השם" בסימולציה הוא הנחת עבודה לצורך הדגמה ולא נתון שוק אמיתי.</small>
+            האם שם של מאכל באמת מגדיל את הרצון לקנות? הקוד ב-<bdi>simulation.py</bdi> מריץ בדפדפן מודל של 1,000 לקוחות לכל מדף, ומשווה בין <strong>מדף א׳</strong> (שמות מספריים <bdi>Shade #01</bdi>) לבין <strong>מדף ב׳ – <bdi>AURA</bdi></strong> (שמות מאכלים כגון <bdi>Golden Honey Glaze</bdi>).<br>
+            <small style="opacity:0.85;">* הנחות עבודה לצורך הדגמה, לא נתוני שוק אמיתיים: 10% קונים ממדף א׳, ו"אפקט השם" (ברירת מחדל 20%) מגדיל את הסיכוי לקנות ממדף ב׳. הזיזו את המחוון כדי לראות את ההשפעה.</small>
           </p>
         </div>
 
         <div class="product-stage-center">
           <div class="campaign-card-center" style="max-width: 580px;">
+            <div class="sim-controls">
+              <label for="nameEffect">אפקט השם</label>
+              <input type="range" id="nameEffect" min="0" max="30" step="5" value="20" aria-describedby="simAssumption">
+              <output id="nameEffectValue" for="nameEffect">20%</output>
+            </div>
+            <div id="simAssumption" class="sim-assumption">הנחת עבודה: בכמה אחוזים שם של מאכל מגדיל את הסיכוי לקנות (0% = אין הבדל)</div>
             <button id="runSimulationBtn" class="sim-run-btn" type="button" onclick="runPythonSimulation()">הרץ סימולציה</button>
-            <div id="simStatusText" class="sim-status-text">לחצו על "הרץ סימולציה" להרצת קוד ה-<bdi>Python</bdi> בזמן אמת בדפדפן</div>
+            <div id="simStatusText" class="sim-status-text" role="status">לחצו על "הרץ סימולציה" להרצת קוד ה-<bdi>Python</bdi> בזמן אמת בדפדפן</div>
             <img id="simulation-chart" alt="גרף תוצאות סימולציית AURA" />
           </div>
         </div>
@@ -1781,12 +1872,12 @@
           </div>
           <div class="meter-group">
             <div class="meter-row">
-              <div class="meter-labels"><span>מדף א׳ (שמות מספריים)</span><span>15%</span></div>
-              <div class="meter-track"><div class="meter-fill" style="--fill: 15%;"></div></div>
+              <div class="meter-labels"><span>מדף א׳ – סיכוי לקנות (הנחה)</span><span>10%</span></div>
+              <div class="meter-track"><div class="meter-fill" style="--fill: 50%;"></div></div>
             </div>
             <div class="meter-row">
-              <div class="meter-labels"><span>מדף ב׳ (<bdi>AURA</bdi> שמות מאכלים)</span><span>45%</span></div>
-              <div class="meter-track"><div class="meter-fill" style="--fill: 45%;"></div></div>
+              <div class="meter-labels"><span>מדף ב׳ – עם אפקט השם</span><span id="rateBLabel">12%</span></div>
+              <div class="meter-track"><div class="meter-fill" id="rateBFill" style="--fill: 60%;"></div></div>
             </div>
           </div>
         </aside>
@@ -1967,12 +2058,15 @@
         }
       });
 
-      // Subtle interactive 6D parallax tilt on mouse move
-      const stage = document.getElementById('presentationStage');
+      // Subtle 6D parallax tilt on mouse move – only the 3D product (tube) column,
+      // so all text stays still and easy to read
+      const productStages = [...document.querySelectorAll('.product-stage-center')]
+        .filter(el => el.querySelector('.product-entrance-wrapper'));
       window.addEventListener('pointermove', (e) => {
         const xNorm = (e.clientX / window.innerWidth - 0.5) * 2;
         const yNorm = (e.clientY / window.innerHeight - 0.5) * 2;
-        stage.style.transform = `rotateY(${xNorm * 5}deg) rotateX(${-yNorm * 5}deg)`;
+        const tilt = `rotateY(${xNorm * 6}deg) rotateX(${-yNorm * 6}deg)`;
+        productStages.forEach(el => { el.style.transform = tilt; });
       });
 
       // Audio Controller (Controls <audio> tag + gentle WebAudio ambient pad fallback if external placeholder URL is offline)
@@ -2043,166 +2137,73 @@
       });
 
       // Pyodide Python Simulation Integration (Slide 11)
+      // The chart only ever shows real Python output, and "completed" appears only after Python finishes.
       let pyodideInstance = null;
+      let simRunning = false;
+      const BASE_RATE = 0.10;   // same assumption as in simulation.py
 
-      function renderInstantChartPreview() {
-        const imgEl = document.getElementById('simulation-chart');
-        if (!imgEl) return;
-        const canvas = document.createElement('canvas');
-        canvas.width = 700;
-        canvas.height = 460;
-        const ctx = canvas.getContext('2d');
+      const effectSlider = document.getElementById('nameEffect');
+      const effectOut = document.getElementById('nameEffectValue');
 
-        // Background
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
+      function updateEffectReadout() {
+        if (!effectSlider) return;
+        const effect = +effectSlider.value / 100;
+        const rateB = BASE_RATE * (1 + effect);
+        if (effectOut) effectOut.textContent = effectSlider.value + '%';
+        const rateBLabel = document.getElementById('rateBLabel');
+        const rateBFill = document.getElementById('rateBFill');
+        if (rateBLabel) rateBLabel.textContent = (rateB * 100).toFixed(1).replace('.0', '') + '%';
+        if (rateBFill) rateBFill.style.setProperty('--fill', (rateB * 500).toFixed(1) + '%');
+      }
 
-        const salesA = 148;
-        const salesB = 452;
-        const maxVal = 520;
-        const chartLeft = 100;
-        const chartRight = 640;
-        const chartTop = 75;
-        const chartBottom = 370;
-        const chartHeight = chartBottom - chartTop;
+      if (effectSlider) {
+        effectSlider.addEventListener('input', updateEffectReadout);
+        // after the first run, moving the slider re-runs the simulation
+        effectSlider.addEventListener('change', () => { if (pyodideInstance && !simRunning) window.runPythonSimulation(); });
+        updateEffectReadout();
+      }
 
-        // Title
-        ctx.fillStyle = '#4A1E3A';
-        ctx.font = 'bold 21px Assistant, sans-serif';
-        ctx.textAlign = 'center';
-        ctx.fillText('השפעת שם המאכל על רכישת ליפ-טינט (1,000 לקוחות)', 370, 38);
-
-        // Axes
-        ctx.strokeStyle = '#4A1E3A';
-        ctx.lineWidth = 2;
-        ctx.beginPath();
-        ctx.moveTo(chartLeft, chartTop);
-        ctx.lineTo(chartLeft, chartBottom);
-        ctx.lineTo(chartRight, chartBottom);
-        ctx.stroke();
-
-        // Y-axis ticks & grid
-        ctx.font = '600 14px Assistant, sans-serif';
-        ctx.textAlign = 'right';
-        for (let v = 0; v <= 500; v += 100) {
-          const y = chartBottom - (v / maxVal) * chartHeight;
-          ctx.fillStyle = '#4A1E3A';
-          ctx.fillText(String(v), chartLeft - 12, y + 5);
-          if (v > 0) {
-            ctx.save();
-            ctx.strokeStyle = 'rgba(74, 30, 58, 0.16)';
-            ctx.setLineDash([5, 5]);
-            ctx.beginPath();
-            ctx.moveTo(chartLeft, y);
-            ctx.lineTo(chartRight, y);
-            ctx.stroke();
-            ctx.restore();
-          }
-        }
-
-        // Bar A: Shelf A (Generic)
-        const barWidth = 145;
-        const xA = 175;
-        const hA = (salesA / maxVal) * chartHeight;
-        const yA = chartBottom - hA;
-        ctx.fillStyle = '#FFF6EC';
-        ctx.strokeStyle = '#4A1E3A';
-        ctx.lineWidth = 2.5;
-        ctx.fillRect(xA, yA, barWidth, hA);
-        ctx.strokeRect(xA, yA, barWidth, hA);
-
-        // Bar B: Shelf B (AURA Food Names)
-        const xB = 420;
-        const hB = (salesB / maxVal) * chartHeight;
-        const yB = chartBottom - hB;
-        ctx.fillStyle = '#D9A441';
-        ctx.fillRect(xB, yB, barWidth, hB);
-        ctx.strokeRect(xB, yB, barWidth, hB);
-
-        // Value labels above bars
-        ctx.fillStyle = '#4A1E3A';
-        ctx.font = 'bold 18px Assistant, sans-serif';
-        ctx.textAlign = 'center';
-        ctx.fillText(salesA + ' רכישות (14.8%)', xA + barWidth / 2, yA - 12);
-        ctx.fillText(salesB + ' רכישות (45.2%)', xB + barWidth / 2, yB - 12);
-
-        // X-axis labels
-        ctx.font = 'bold 16px Assistant, sans-serif';
-        ctx.fillText('מדף א׳ (שמות רגילים)', xA + barWidth / 2, chartBottom + 32);
-        ctx.fillText('Shade #01 – #05', xA + barWidth / 2, chartBottom + 54);
-        ctx.fillText('מדף ב׳ - AURA (שמות מאכלים)', xB + barWidth / 2, chartBottom + 32);
-        ctx.fillText('Golden Honey Glaze · Berry · Cocoa', xB + barWidth / 2, chartBottom + 54);
-
-        imgEl.src = canvas.toDataURL('image/png');
+      async function getSimulationSource() {
+        try {
+          const response = await fetch('simulation.py', { cache: 'no-store' });
+          if (response.ok) return await response.text();
+        } catch (e) { /* opened as a local file: the browser blocks fetch */ }
+        return document.getElementById('simulation-source').textContent;   // identical embedded copy
       }
 
       window.runPythonSimulation = async function () {
+        if (simRunning) return;
+        simRunning = true;
         const btn = document.getElementById('runSimulationBtn');
         const statusEl = document.getElementById('simStatusText');
+        const imgEl = document.getElementById('simulation-chart');
+        const effect = effectSlider ? +effectSlider.value / 100 : 0.2;
         if (btn) btn.disabled = true;
-        if (statusEl) statusEl.textContent = 'טוען סביבת Python (Pyodide) וחבילת Matplotlib...';
-
-        // Render immediate preview so the chart is never blank while Pyodide loads
-        renderInstantChartPreview();
-        if (statusEl) statusEl.textContent = 'הסימולציה הושלמה בהצלחה! (1,000 לקוחות וירטואליים)';
+        if (imgEl) imgEl.style.opacity = '0.35';
 
         try {
-          if (typeof loadPyodide === 'function') {
-            if (!pyodideInstance) {
-              pyodideInstance = await loadPyodide();
-              await pyodideInstance.loadPackage('matplotlib');
-            }
-
-            await pyodideInstance.runPythonAsync("import matplotlib\nmatplotlib.use('Agg')\nimport matplotlib.pyplot as plt\nplt.clf()");
-
-            let scriptText = '';
-            try {
-              const response = await fetch('simulation.py');
-              if (!response.ok) throw new Error('Try final/simulation.py');
-              scriptText = await response.text();
-            } catch (fetchErr1) {
-              try {
-                const response2 = await fetch('final/simulation.py');
-                if (!response2.ok) throw new Error('Fallback to inline simulation.py');
-                scriptText = await response2.text();
-              } catch (fetchErr2) {
-                scriptText = [
-                  "import io",
-                  "import base64",
-                  "import random",
-                  "import matplotlib.pyplot as plt",
-                  "from js import document",
-                  "customers = 1000",
-                  "prob_shelf_a = 0.15",
-                  "prob_shelf_b = 0.45",
-                  "sales_a = sum([1 for _ in range(customers) if random.random() < prob_shelf_a])",
-                  "sales_b = sum([1 for _ in range(customers) if random.random() < prob_shelf_b])",
-                  "labels = ['מדף א\\n(שמות רגילים)', 'מדף ב - AURA\\n(שמות מאכלים)']",
-                  "sales = [sales_a, sales_b]",
-                  "colors = ['#FFF6EC', '#D9A441']",
-                  "edge_color = '#4A1E3A'",
-                  "plt.figure(figsize=(7, 5), facecolor='none')",
-                  "plt.bar(labels, sales, color=colors, edgecolor=edge_color, linewidth=2)",
-                  "plt.title('השפעת שם המאכל על רכישת ליפ-טינט (1,000 לקוחות)', fontsize=14, color=edge_color)",
-                  "plt.ylabel('מספר רכישות', fontsize=12, color=edge_color)",
-                  "buf = io.BytesIO()",
-                  "plt.savefig(buf, format='png', transparent=True)",
-                  "buf.seek(0)",
-                  "encoded_string = base64.b64encode(buf.read()).decode('utf-8')",
-                  "img_element = document.getElementById('simulation-chart')",
-                  "if img_element:",
-                  "    img_element.src = f'data:image/png;base64,{encoded_string}'"
-                ].join("\n");
-              }
-            }
-
-            await pyodideInstance.runPythonAsync(scriptText);
+          if (typeof loadPyodide !== 'function') throw new Error('offline');
+          if (!pyodideInstance) {
+            if (statusEl) statusEl.textContent = 'טוען את Python בדפדפן (Pyodide + Matplotlib)… בפעם הראשונה זה לוקח כ-20 שניות';
+            const py = await loadPyodide();
+            await py.loadPackage('matplotlib');
+            pyodideInstance = py;
           }
-          if (statusEl) statusEl.textContent = 'הסימולציה הושלמה בהצלחה! (1,000 לקוחות וירטואליים)';
+          if (statusEl) statusEl.textContent = 'מריץ את הסימולציה ב-Python…';
+          pyodideInstance.globals.set('NAME_EFFECT', effect);
+          await pyodideInstance.runPythonAsync(await getSimulationSource());
+          const a = pyodideInstance.globals.get('sales_a');
+          const b = pyodideInstance.globals.get('sales_b');
+          if (statusEl) statusEl.textContent = `הסימולציה הושלמה: מדף א׳ – ${a} רוכשים, מדף ב׳ – ${b} רוכשים (אפקט שם ${Math.round(effect * 100)}%)`;
         } catch (err) {
           console.error('Pyodide simulation error:', err);
-          if (statusEl) statusEl.textContent = 'הסימולציה הושלמה בהצלחה! (1,000 לקוחות וירטואליים)';
+          if (statusEl) statusEl.textContent = err && err.message === 'offline'
+            ? 'לא ניתן לטעון את Python – נדרש חיבור לאינטרנט'
+            : 'שגיאה בהרצת Python – נסו שוב';
         } finally {
+          if (imgEl) imgEl.style.opacity = '1';
           if (btn) btn.disabled = false;
+          simRunning = false;
         }
       };
 
@@ -2234,6 +2235,102 @@
         window.runPythonSimulation();
       }
     })();
+  </script>
+  <!-- Identical copy of final/simulation.py. The deck runs this copy when it is opened as a local file (the browser blocks reading simulation.py there). Keep both the same. -->
+  <script type="text/x-python" id="simulation-source">
+import io
+import base64
+import random
+import matplotlib
+matplotlib.use('Agg')
+import matplotlib.pyplot as plt
+
+# סימולציית A/B לשקף 11 – רצה בדפדפן בעזרת Pyodide.
+# המצגת קובעת את NAME_EFFECT לפי המחוון לפני ההרצה.
+# עותק זהה של הקובץ שמור בתוך final/deck.html (id="simulation-source"),
+# כי כשפותחים את המצגת ישירות מהמחשב הדפדפן לא מאפשר לקרוא קבצים אחרים.
+
+# 1. הגדרות הניסוי
+CUSTOMERS = 1000            # לקוחות וירטואליים לכל מדף
+BASE_RATE = 0.10            # הנחת עבודה: 10% קונים ממדף א' (שמות מספריים, Shade #01)
+DEFAULT_NAME_EFFECT = 0.20  # הנחת עבודה: שם של מאכל מגדיל את הסיכוי לקנות ב-20% (יחסי)
+SEED = 2026                 # זרע קבוע – אותה תוצאה בכל הרצה עם אותו אפקט
+
+# 2. אפקט השם מהמחוון (אם לא הוגדר – ברירת המחדל)
+try:
+    name_effect = float(NAME_EFFECT)
+except NameError:
+    name_effect = DEFAULT_NAME_EFFECT
+
+rate_a = BASE_RATE                      # מדף א': שמות מספריים
+rate_b = BASE_RATE * (1 + name_effect)  # מדף ב': AURA עם שמות מאכלים (Golden Honey Glaze)
+
+# 3. ביצוע הסימולציה: כל לקוח קונה או לא לפי הסיכוי של המדף
+rng = random.Random(SEED)
+
+
+def count_buyers(rate):
+    return sum(1 for _ in range(CUSTOMERS) if rng.random() < rate)
+
+
+sales_a = count_buyers(rate_a)
+sales_b = count_buyers(rate_b)
+
+
+# 4. עברית בגרף: Matplotlib כותב משמאל לימין, אז הופכים את סדר המילים
+#    ואת האותיות בכל מילה עברית (מילים באנגלית ומספרים נשארים כמו שהם)
+def rtl(text):
+    lines = []
+    for line in text.split('\n'):
+        words = []
+        for word in reversed(line.split(' ')):
+            is_hebrew = any('֐' <= ch <= '׿' for ch in word)
+            words.append(word[::-1] if is_hebrew else word)
+        lines.append(' '.join(words))
+    return '\n'.join(lines)
+
+
+# 5. הגרף בצבעי המותג של AURA
+edge_color = '#4A1E3A'  # שזיף עמוק
+labels = [rtl("מדף א׳\nשמות מספריים"), rtl("מדף ב׳ – AURA\nשמות מאכלים")]
+sales = [sales_a, sales_b]
+
+fig, ax = plt.subplots(figsize=(7, 5), facecolor='none')
+bars = ax.bar(labels, sales, color=['#FFF6EC', '#D9A441'], edgecolor=edge_color, linewidth=2, width=0.55)
+for bar, value in zip(bars, sales):
+    ax.text(bar.get_x() + bar.get_width() / 2, value + 2, rtl(f"{value} רוכשים"),
+            ha='center', va='bottom', fontsize=12, fontweight='bold', color=edge_color)
+ax.set_title(rtl(f"אפקט השם: {round(name_effect * 100)}% · {CUSTOMERS:,} לקוחות לכל מדף"),
+             fontsize=14, color=edge_color)
+ax.set_ylabel(rtl("מספר רוכשים"), fontsize=12, color=edge_color)
+ax.set_ylim(0, max(sales) * 1.25 + 5)
+ax.tick_params(colors=edge_color)
+for side in ('top', 'right'):
+    ax.spines[side].set_visible(False)
+fig.text(0.5, 0.01, rtl("הנחת עבודה לצורך הדגמה – לא נתון שוק אמיתי"),
+         ha='center', fontsize=9, color=edge_color, alpha=0.75)
+fig.tight_layout(rect=(0, 0.04, 1, 1))
+
+# 6. המרת הגרף לתמונה (Base64) והצגתה בשקף 11.
+#    כשמריצים במחשב (python final/simulation.py) – שומרים את הגרף כקובץ PNG.
+try:
+    from js import document  # קיים רק בדפדפן (Pyodide)
+except ImportError:
+    document = None
+
+if document is None:
+    fig.savefig('simulation-chart.png', dpi=110)
+    print(f"Shelf A: {sales_a} buyers, Shelf B: {sales_b} buyers (name effect {round(name_effect * 100)}%)")
+    print("Chart saved: simulation-chart.png")
+else:
+    buf = io.BytesIO()
+    fig.savefig(buf, format='png', transparent=True, dpi=110)
+    buf.seek(0)
+    encoded_string = base64.b64encode(buf.read()).decode('utf-8')
+    img_element = document.getElementById('simulation-chart')
+    if img_element:
+        img_element.src = f"data:image/png;base64,{encoded_string}"
+plt.close(fig)
   </script>
 </body>
 </html>
