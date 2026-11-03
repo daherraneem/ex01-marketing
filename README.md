@@ -64,7 +64,7 @@ We asked Gemini to review the project as a committee of 10 experts (prompt: [`pr
 - The copy did not say anything about texture, and the sensory words were weak.
 
 **What we fixed:**
-- **Simulation (slide 11):** a slider for the name effect (0–30%), a modest default (10% → 12%, a 20% relative lift) that is labelled as an assumption, Hebrew in the correct right-to-left order, and "completed" only after Python really finishes. `simulation.py` now also runs on a computer and saves a PNG.
+- **Simulation (slide 11):** a slider for the name effect (0–30%), a modest default (10% → 12%, a 20% relative lift) that is labelled as an assumption, Hebrew in the correct right-to-left order, and "completed" only after Python really finishes. `simulation.py` now also runs on a computer and saves a PNG (not tested locally).
 - **Slides 6–8:** removed the unsourced percentages (slides 6, 7 and 8). Slide 7 now has 3 short facts about Rhode's food-inspired marketing, each with a public source (Glossy, NewBeauty). The PRD now says Part A is one bridge slide, because we chose to focus on our own brand, AURA.
 - **Deck UX:** the parallax moves only the 3D product, never the text; navigation dots are bigger, with a 36 × 44px click area.
 - **Copy:** a "melting, silky, non-sticky" texture line in the positioning statement, and warmer sensory words in the five shade descriptions.
