@@ -4,7 +4,7 @@
 **University:** University of Haifa
 **Assignment:** Exercise 1
 **Team:** Raneem Daher & Raghad Rabah
-**Status:** Film final (v3) · Deck final (v3)
+**Status:** Film final (v3) · Deck final (v4)
 
 ## Project Structure
 
@@ -25,6 +25,7 @@
 - **2026-11-03** – Film v2 (`src/film-v2.html`): 5 tubes, one per shade, each with its own food, and a more natural look. Updated the storyboard in `docs/concept-brief.md` to match. Not selected, because all tubes appear together; next version will give each shade its own moment. Prompt saved in `prompts/06-film-v2.md` (Raneem).
 - **2026-11-03** – Film v3 (`src/film-v3.html`), **the final film**: 24 s, Raghad's five shades from the deck, each alone with its own food, the deck's colors and fonts, realistic glass and gold, and a Web Audio soundtrack with a signature per shade. Updated the shade names in `PRD.md` and `docs/concept-brief.md` to Raghad's names. Prompt saved in `prompts/07-film-v3.md` (Raneem).
 - **2026-11-03** – Deck v1 → v3 (`src/deck-v3.html`) & Python simulation (`src/simulation.py`): built the Hebrew RTL presentation with 6D floating product slides and campaign slides, added the 1,000-customer A/B Python simulation running in the browser with Pyodide on Slide 11, and embedded the final 3D launch film (`src/film-v3.html`) on Slide 10 with audio and fullscreen support. Prompts saved in `prompts/06-python-simulation.md` and `prompts/09-embed-film-v3.md` (Raghad).
+- **2026-11-03** – Deck v4 (`src/deck-v4.html`): updated Slide 7 by removing the content about Hailey Bieber and replacing it with a bridge slide ("מההשראה למותג שלנו") connecting Rhode's food-inspired marketing insight to our original brand, AURA. Prompt saved in `prompts/10-slide7-update.md` (Raghad).
 
 ## Film Versions
 
@@ -40,7 +41,8 @@
 | ------- | ---- | ---------- | ----------------- | ------ |
 | v1 | `src/deck-v1.html` | First presentation – 5 interactive 6D floating lip tint shade slides in Hebrew RTL with ambient audio and sensory specs. | – (starting point) | Replaced by v2 |
 | v2 | `src/deck-v2.html` | Added the Rhode case study & AURA campaign strategy slides plus Slide 11 with the live Python A/B simulation (`src/simulation.py`) running in the browser via Pyodide. | To back our sensory marketing insight with a 1,000-customer simulation chart directly inside the deck, as required by the PRD. | Replaced by v3 |
-| v3 | `src/deck-v3.html` | Moved the deck into `src/` alongside `film-v3.html` and embedded the final 3D launch film (`src/film-v3.html`) on Slide 10 using an `<iframe>` with `allow="autoplay; fullscreen"`. | Because the old relative path pointed to the wrong folder and lacked audio/fullscreen permissions; placing both files in `src/` makes the embedded 3D film play seamlessly inside Slide 10. | **Selected – final version** |
+| v3 | `src/deck-v3.html` | Moved the deck into `src/` alongside `film-v3.html` and embedded the final 3D launch film (`src/film-v3.html`) on Slide 10 using an `<iframe>` with `allow="autoplay; fullscreen"`. | Because the old relative path pointed to the wrong folder and lacked audio/fullscreen permissions; placing both files in `src/` makes the embedded 3D film play seamlessly inside Slide 10. | Replaced by v4 |
+| v4 | `src/deck-v4.html` | Slide 7: removed the content about Hailey Bieber and replaced it with a bridge slide (from inspiration to our own brand). | Our project focuses on our original brand, AURA; Rhode is used only as inspiration. | **Selected – final version** |
 
 ## Screenshots
 
