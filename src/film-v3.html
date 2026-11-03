@@ -1,0 +1,1408 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AURA – סרטון השקה (v3)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<!-- Raghad's deck fonts: Assistant (Hebrew + UI) and Cormorant Garamond (brand) -->
+<link href="https://fonts.googleapis.com/css2?family=Assistant:wght@300;400;600;700;800&family=Cormorant+Garamond:ital,wght@0,500;0,600;0,700;1,500;1,600&display=swap" rel="stylesheet">
+<style>
+  /* palette from deck-v1.html (:root) */
+  :root {
+    --bg-primary: #fdf6ec;
+    --bg-secondary: #f7dfc2;
+    --bg-accent: #e6a94e;
+    --text-dark: #2c1d14;
+    --text-muted: #6e523f;
+  }
+  * { box-sizing: border-box; }
+  html, body {
+    margin: 0; height: 100%; overflow: hidden;
+    background: var(--bg-primary); color: var(--text-dark);
+    font-family: 'Assistant', system-ui, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    user-select: none;
+  }
+  #stage, #stage canvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
+  .layer { position: absolute; inset: 0; pointer-events: none; }
+  .serif { font-family: 'Cormorant Garamond', Georgia, serif; }
+
+  /* ---------- captions ---------- */
+  .caption {
+    position: absolute; left: 0; right: 0; bottom: 7%;
+    text-align: center; direction: rtl;
+    font-weight: 600; font-size: clamp(18px, 3.6vmin, 36px); letter-spacing: .01em;
+    color: var(--cap-color, var(--text-dark));
+    text-shadow: 0 0 22px rgba(255,255,255,.9), 0 0 6px rgba(255,255,255,.8);
+    opacity: 0; transform: translateY(14px);
+    transition: opacity .7s ease, transform .7s cubic-bezier(.22,1,.36,1), color .6s ease;
+  }
+  .caption.show { opacity: 1; transform: none; }
+
+  /* ---------- shade card (one per shade, like the deck's product-info) ---------- */
+  .card {
+    position: absolute; top: 50%; right: 6%; width: min(33%, 520px);
+    display: flex; flex-direction: column; align-items: flex-start; gap: 1.6vmin;
+    opacity: 0; transform: translate3d(0, calc(-50% + 48px), 0);
+    transition: opacity .55s ease, transform .8s cubic-bezier(.22,1,.36,1);
+  }
+  .card.show { opacity: 1; transform: translate3d(0, -50%, 0); }
+  .badge {
+    display: inline-flex; align-items: center; gap: 8px;
+    padding: .45em 1.1em; border-radius: 999px;
+    background: rgba(255,255,255,.5); border: 1px solid rgba(255,255,255,.7);
+    backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+    font-size: clamp(11px, 1.9vmin, 17px); font-weight: 700; letter-spacing: .04em;
+  }
+  .badge i { width: .7em; height: .7em; border-radius: 50%; display: inline-block; }
+  .card h2 {
+    margin: 0; font-weight: 800; line-height: .98; letter-spacing: -.02em;
+    font-size: clamp(38px, 9vmin, 104px);
+    text-shadow: 0 12px 30px rgba(255,255,255,.4);
+  }
+  .card .sub {
+    font-family: 'Cormorant Garamond', Georgia, serif; font-weight: 600;
+    font-size: clamp(15px, 3vmin, 30px); letter-spacing: .2em;
+  }
+  .card .bar { width: 62%; height: 6px; border-radius: 99px; box-shadow: 0 6px 18px var(--glow); }
+
+  /* ---------- logos ---------- */
+  .logo {
+    position: absolute; left: 0; right: 0; text-align: center;
+    font-family: 'Cormorant Garamond', Georgia, serif; font-weight: 700;
+    letter-spacing: .28em; padding-left: .28em; /* balance trailing letter-spacing */
+    color: var(--text-dark); line-height: 1;
+    text-shadow: 0 10px 40px rgba(255,255,255,.7);
+    opacity: 0; transform: translateY(18px) scale(.97);
+    transition: opacity 1s ease, transform 1.4s cubic-bezier(.22,1,.36,1);
+  }
+  .logo.show { opacity: 1; transform: none; }
+  #introLogo { top: 38%; font-size: clamp(56px, 17vmin, 200px); }
+  #introLogo small, #logo small {
+    display: block; margin-top: .55em; font-family: 'Assistant', sans-serif;
+    font-size: .13em; font-weight: 600; letter-spacing: .4em; color: var(--text-muted);
+  }
+  #logo { top: 7%; font-size: clamp(48px, 13vmin, 150px); }
+  .slogan {
+    position: absolute; top: calc(7% + clamp(48px, 13vmin, 150px) * 1.12); left: 0; right: 0;
+    text-align: center;
+    font-family: 'Cormorant Garamond', Georgia, serif; font-style: italic; font-weight: 600;
+    font-size: clamp(20px, 4vmin, 42px); color: var(--text-muted); letter-spacing: .03em;
+    opacity: 0; transform: translateY(10px); transition: opacity 1s ease, transform 1s ease;
+  }
+  .slogan.show { opacity: 1; transform: none; }
+
+  /* ---------- progress ---------- */
+  #progress { position: absolute; left: 0; right: 0; bottom: 0; height: 3px; background: rgba(44,29,20,.08); transition: opacity .6s; }
+  #progress i { display: block; height: 100%; width: 0; background: linear-gradient(90deg, #e69217, #f26c4b, #d42663, #ba1128, #784121); }
+
+  /* ---------- Play screen (deck look) ---------- */
+  #intro {
+    position: absolute; inset: 0; display: flex; flex-direction: column;
+    align-items: center; justify-content: center; gap: 2.4vmin;
+    background: radial-gradient(circle at 50% 42%, #fdf6ec 0%, #f7dfc2 58%, #e6a94e 100%);
+    transition: opacity .8s ease;
+    overflow: hidden;
+  }
+  #intro::before, #intro::after {
+    content: ''; position: absolute; border-radius: 50%; filter: blur(85px); opacity: .55; pointer-events: none;
+  }
+  #intro::before { width: 48vw; height: 48vw; top: -12vw; right: -10vw; background: #f5b95f; }
+  #intro::after  { width: 42vw; height: 42vw; bottom: -14vw; left: -8vw; background: #d68521; }
+  #intro > * { position: relative; z-index: 1; }
+  #intro.hide { opacity: 0; pointer-events: none; }
+  #intro .mark {
+    font-family: 'Cormorant Garamond', Georgia, serif; font-weight: 700;
+    font-size: clamp(48px, 14vmin, 150px); letter-spacing: .28em; padding-left: .28em; line-height: 1;
+  }
+  #intro .sub { font-weight: 600; font-size: clamp(14px, 2.6vmin, 22px); color: var(--text-muted); }
+  #intro .hint { font-weight: 400; font-size: clamp(11px, 1.9vmin, 15px); color: var(--text-muted); opacity: .8; }
+
+  .btn {
+    pointer-events: auto; cursor: pointer;
+    font-family: inherit; font-size: clamp(15px, 2.5vmin, 21px); font-weight: 700;
+    color: #fff; background: var(--text-dark);
+    border: 0; border-radius: 999px; padding: .75em 2.1em;
+    box-shadow: 0 10px 30px rgba(44,29,20,.25);
+    transition: transform .28s cubic-bezier(.22,1,.36,1), box-shadow .3s;
+  }
+  .btn:hover { transform: translateY(-2px); box-shadow: 0 14px 36px rgba(44,29,20,.32); }
+  .btn:focus-visible { outline: 2px solid var(--text-dark); outline-offset: 3px; }
+  .btn.ghost {
+    color: var(--text-dark); background: rgba(255,255,255,.5);
+    box-shadow: 0 0 0 1px rgba(255,255,255,.75) inset, 0 8px 24px rgba(44,29,20,.08);
+    backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+  }
+
+  #endControls {
+    position: absolute; left: 0; right: 0; bottom: 2.2%;
+    display: flex; gap: 12px; justify-content: center;
+    opacity: 0; transition: opacity .8s ease; pointer-events: none;
+  }
+  #endControls.show { opacity: 1; }
+  #endControls.show .btn { pointer-events: auto; }
+  #endControls .btn { pointer-events: none; font-size: clamp(12px, 2vmin, 16px); padding: .55em 1.4em; }
+  #orbitHint {
+    position: absolute; top: 2.5%; left: 0; right: 0; text-align: center; color: var(--text-muted);
+    font-size: clamp(11px, 1.9vmin, 15px); opacity: 0; transition: opacity .5s;
+  }
+  #orbitHint.show { opacity: .8; }
+
+  /* narrow / portrait screens: card goes to the top, centered */
+  @media (max-aspect-ratio: 1/1) {
+    .card { top: 6%; right: 0; left: 0; width: auto; align-items: center; text-align: center; transform: translate3d(0, 40px, 0); }
+    .card.show { transform: none; }
+    .card .bar { width: 40%; }
+  }
+</style>
+</head>
+<body>
+
+<div id="stage"></div>
+
+<div class="layer" id="overlay">
+  <div class="logo" id="introLogo" dir="ltr">AURA<small>LIP TINT</small></div>
+  <div class="logo" id="logo" dir="ltr">AURA</div>
+  <div class="slogan" id="slogan"><bdi dir="ltr">Your glow, freshly made.</bdi></div>
+
+  <div id="cards"></div>
+
+  <div class="caption" data-from="0.35" data-to="1.65">לכל גוון – טעם משלו</div>
+  <div class="caption" data-from="9.1" data-to="15.5">מה שמזין אותך הופך לזוהר</div>
+  <div class="caption" data-from="21.0" data-to="999">הזוהר שלך מתחיל כאן</div>
+
+  <div id="orbitHint">גררו כדי לסובב את המצלמה · גלגלת לזום</div>
+  <div id="progress"><i></i></div>
+</div>
+
+<div class="layer" id="endControls">
+  <button class="btn" id="replayBtn">↻ צפייה חוזרת</button>
+  <button class="btn ghost" id="orbitBtn">סיבוב חופשי במצלמה</button>
+</div>
+
+<div id="intro">
+  <div class="mark" dir="ltr">AURA</div>
+  <div class="sub">סרטון השקה · <bdi dir="ltr">Lip Tint</bdi> · חמישה גוונים, חמישה טעמים</div>
+  <button class="btn" id="playBtn">▶ הפעל</button>
+  <div class="hint">מומלץ לצפות עם סאונד 🔊</div>
+</div>
+
+<script type="importmap">
+{
+  "imports": {
+    "three": "https://cdn.jsdelivr.net/npm/three@0.169.0/build/three.module.js",
+    "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.169.0/examples/jsm/"
+  }
+}
+</script>
+
+<script type="module">
+import * as THREE from 'three';
+import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
+import { RoundedBoxGeometry } from 'three/addons/geometries/RoundedBoxGeometry.js';
+
+/* =========================================================
+   AURA – 3D launch film, v3
+   Raghad's five shades (deck-v1.html), each with its own moment.
+   Music: 137 BPM, one bar = 1.75 s, one shade = 2 bars = 3.5 s.
+   Timeline (seconds):
+   0–1.75       intro: AURA logo, "לכל גוון – טעם משלו", camera cranes down
+   1.75–19.25   five shade moments, 3.5 s each. Each one: its podium,
+                tube and food alone in frame; the food drops in and glows,
+                the cap lifts and the applicator draws a swatch.
+                The background colors change to the shade's deck colors.
+   19.25–24     end card: all five tubes, AURA logo, slogan,
+                "הזוהר שלך מתחיל כאן"
+   ========================================================= */
+
+const BPM = 960 / 7, BEAT = 60 / BPM, BAR = 4 * BEAT;   // 0.4375 s, 1.75 s
+const T0 = BAR;                // first shade starts after one intro bar
+const SHADE_LEN = 2 * BAR;     // 3.5 s
+const T_END = T0 + 5 * SHADE_LEN;   // 19.25 s – end card
+const DURATION = 24;
+const V = THREE.Vector3;
+
+/* ---------- Raghad's shades (deck-v1.html) ---------- */
+const SHADES = [
+  { he: 'דבש טהור',    en: 'Golden Honey Glaze',     short: 'דבש',       flavor: 'בטעם דבש',
+    liquid: ['#ffcf61', '#e69217', '#9c5304'], dot: '#f09d18', cap: '#faecd4',
+    bg: ['#fff9ed', '#f8dfa8', '#e3a036'], text: ['#33200d', '#785328'], tube: ['#f7be4f', '#c97a10'] },
+  { he: 'אפרסק עסיסי', en: 'Velvet Peach Nectar',    short: 'אפרסק',     flavor: 'בטעם אפרסק',
+    liquid: ['#ffb299', '#f26c4b', '#b33216'], dot: '#f47151', cap: '#ffe7de',
+    bg: ['#fff3ed', '#ffd4be', '#f48b6a'], text: ['#381810', '#854534'], tube: ['#ff9d7e', '#e35d3d'] },
+  { he: 'פירות יער',   en: 'Berry Crush Elixir',     short: 'פירות יער', flavor: 'בטעם פירות יער',
+    liquid: ['#ff7aa8', '#d42663', '#78072f'], dot: '#d62865', cap: '#fce1eb',
+    bg: ['#fff0f5', '#f8bfd4', '#d94b7d'], text: ['#330b1c', '#7d3150'], tube: ['#f26b9a', '#b31b50'] },
+  { he: 'רימון רובי',  en: 'Ruby Pomegranate Jewel', short: 'רימון',     flavor: 'בטעם רימון',
+    liquid: ['#ff4760', '#ba1128', '#59020e'], dot: '#c4142c', cap: '#fadce0',
+    bg: ['#fff0f0', '#f5b5bc', '#b82538'], text: ['#2e070d', '#751d29'], tube: ['#e33b52', '#87091b'] },
+  { he: 'קקאו קטיפתי', en: 'Silk Cocoa Glaze',       short: 'קקאו',      flavor: 'בטעם קקאו',
+    liquid: ['#c47e54', '#784121', '#381906'], dot: '#6e3b1e', cap: '#ede0d5',
+    bg: ['#f7efe8', '#dec3ae', '#7d4e32'], text: ['#241309', '#633e27'], tube: ['#a66843', '#4f2912'] },
+];
+// deck :root palette – used for the intro and the end card
+const ROOT = { bg: ['#fdf6ec', '#f7dfc2', '#e6a94e'], text: ['#2c1d14', '#6e523f'], tube: ['#f5b95f', '#d68521'] };
+
+/* ---------- helpers ---------- */
+const clamp01 = x => Math.min(1, Math.max(0, x));
+const seg = (t, a, b) => clamp01((t - a) / (b - a));
+const easeOutCubic = x => 1 - Math.pow(1 - x, 3);
+const easeInOutCubic = x => x < .5 ? 4 * x * x * x : 1 - Math.pow(-2 * x + 2, 3) / 2;
+const easeOutBack = x => { const c1 = 1.70158, c3 = c1 + 1; return 1 + c3 * Math.pow(x - 1, 3) + c1 * Math.pow(x - 1, 2); };
+const smooth = x => x * x * (3 - 2 * x);
+const easeOutSoft = x => 1 + 1.6 * Math.pow(x - 1, 3) + 0.6 * Math.pow(x - 1, 2);   // tiny overshoot: food never sinks into its podium
+const shadeStart = k => T0 + k * SHADE_LEN;
+
+/* =========================================================
+   Renderer, scene, camera
+   ========================================================= */
+const stage = document.getElementById('stage');
+const renderer = new THREE.WebGLRenderer({ antialias: true, powerPreference: 'high-performance' });
+renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+renderer.toneMapping = THREE.NeutralToneMapping;    // keeps the deck's colors true
+renderer.toneMappingExposure = 1.0;
+renderer.shadowMap.enabled = true;
+renderer.shadowMap.type = THREE.PCFShadowMap;
+renderer.setClearColor('#fdf6ec');
+stage.appendChild(renderer.domElement);
+
+const scene = new THREE.Scene();
+const camera = new THREE.PerspectiveCamera(38, 16 / 9, 0.1, 100);
+
+// environment lighting: reflections on glass, gold and gloss
+const pmrem = new THREE.PMREMGenerator(renderer);
+scene.environment = pmrem.fromScene(new RoomEnvironment(), 0.03).texture;
+scene.environmentIntensity = 0.95;
+
+const controls = new OrbitControls(camera, renderer.domElement);
+controls.enabled = false;
+controls.enableDamping = true;
+controls.minDistance = 3;
+controls.maxDistance = 16;
+controls.maxPolarAngle = Math.PI * 0.49;
+
+/* ---------- deck background: cream-peach radial gradient + blurred aura orbs ----------
+   A full-screen quad drawn behind everything. Colors blend per shade.
+   Extra soft glows ("auras") sit behind the current tube and food. */
+const NGLOW = 4;
+const bgMat = new THREE.ShaderMaterial({
+  depthWrite: false, depthTest: false, toneMapped: false,
+  uniforms: {
+    uP: { value: new THREE.Color() }, uS: { value: new THREE.Color() }, uA: { value: new THREE.Color() },
+    uO1: { value: new THREE.Color() }, uO2: { value: new THREE.Color() },
+    uTime: { value: 0 }, uAspect: { value: 16 / 9 }, uShift: { value: 0 },
+    uGP: { value: Array.from({ length: NGLOW }, () => new V()) },
+    uGC: { value: Array.from({ length: NGLOW }, () => new THREE.Vector4()) },
+  },
+  vertexShader: `varying vec2 vUv;
+    void main(){ vUv = uv; gl_Position = vec4(position.xy, 0.9999, 1.0); }`,
+  fragmentShader: `
+    uniform vec3 uP, uS, uA, uO1, uO2; uniform float uTime, uAspect, uShift;
+    uniform vec3 uGP[${NGLOW}]; uniform vec4 uGC[${NGLOW}];
+    varying vec2 vUv;
+    float hash(vec2 p){ return fract(sin(dot(p, vec2(12.9898, 78.233))) * 43758.5453); }
+    void main(){
+      // radial-gradient(circle at 50% 42%, primary 0%, secondary 58%, accent 100%) – farthest corner
+      vec2 c0 = vec2(0.5, 0.58);
+      vec2 p = (vUv - c0) * vec2(uAspect, 1.0);
+      float far = length(vec2(0.5 * uAspect, 0.58));
+      float r = length(p) / far;
+      vec3 col = r < 0.58 ? mix(uP, uS, smoothstep(0.0, 1.0, r / 0.58)) : mix(uS, uA, smoothstep(0.0, 1.0, (r - 0.58) / 0.42));
+      // the two blurred aura orbs (top-right / bottom-left), drifting slowly
+      vec2 q = vUv * vec2(uAspect, 1.0);
+      vec2 o1 = vec2(uAspect * (0.9 + 0.03 * sin(uTime * 0.42)) - uShift, 0.93 + 0.04 * cos(uTime * 0.37));
+      vec2 o2 = vec2(uAspect * (0.1 + 0.03 * cos(uTime * 0.33)) - uShift, 0.04 + 0.04 * sin(uTime * 0.29));
+      float d1 = length(q - o1) / 0.62, d2 = length(q - o2) / 0.56;
+      col = mix(col, uO1, 0.55 * exp(-d1 * d1 * 2.2));
+      col = mix(col, uO2, 0.5 * exp(-d2 * d2 * 2.2));
+      // soft glows behind the products
+      for (int i = 0; i < ${NGLOW}; i++) {
+        vec2 d = (vUv - uGP[i].xy) * vec2(uAspect, 1.0);
+        float g = exp(-dot(d, d) / max(uGP[i].z * uGP[i].z, 1e-5));
+        col = mix(col, uGC[i].rgb, uGC[i].a * g);
+      }
+      col += (hash(vUv * 1000.0 + uTime) - 0.5) / 255.0;   // dither: no banding
+      gl_FragColor = vec4(col, 1.0);
+      #include <colorspace_fragment>
+    }`,
+});
+const bgQuad = new THREE.Mesh(new THREE.PlaneGeometry(2, 2), bgMat);
+bgQuad.frustumCulled = false;
+bgQuad.renderOrder = -1000;
+scene.add(bgQuad);
+
+/* ---------- invisible floor that only shows soft shadows ---------- */
+const floor = new THREE.Mesh(new THREE.PlaneGeometry(120, 40), new THREE.ShadowMaterial({ color: '#5a3418', opacity: 0.2 }));
+floor.rotation.x = -Math.PI / 2;
+floor.position.x = 18;
+floor.receiveShadow = true;
+scene.add(floor);
+
+/* ---------- lights: soft studio setup that follows the camera ---------- */
+const hemi = new THREE.HemisphereLight(0xfff4e8, 0xe8c8a8, 1.1);
+scene.add(hemi);
+const keyLight = new THREE.DirectionalLight(0xfff0e0, 2.3);
+keyLight.castShadow = true;
+keyLight.shadow.mapSize.set(2048, 2048);
+Object.assign(keyLight.shadow.camera, { left: -5, right: 5, top: 5, bottom: -3, near: 0.5, far: 30 });
+keyLight.shadow.bias = -0.0004;
+keyLight.shadow.normalBias = 0.03;
+keyLight.shadow.radius = 6;
+scene.add(keyLight, keyLight.target);
+const rimLight = new THREE.DirectionalLight(0xffd9b0, 1.6);
+scene.add(rimLight, rimLight.target);
+
+/* ---------- generated textures (no image files) ---------- */
+function radialTexture(stops) {
+  const c = document.createElement('canvas'); c.width = c.height = 128;
+  const g = c.getContext('2d');
+  const gr = g.createRadialGradient(64, 64, 0, 64, 64, 64);
+  stops.forEach(([o, a]) => gr.addColorStop(o, `rgba(255,255,255,${a})`));
+  g.fillStyle = gr; g.fillRect(0, 0, 128, 128);
+  const t = new THREE.CanvasTexture(c); t.colorSpace = THREE.SRGBColorSpace;
+  return t;
+}
+const dotTex = radialTexture([[0, 1], [0.25, 0.85], [0.6, 0.2], [1, 0]]);
+
+function physMat(hex, o = {}) {
+  return new THREE.MeshPhysicalMaterial(Object.assign({
+    color: new THREE.Color(hex), roughness: 0.3, clearcoat: 0.6, clearcoatRoughness: 0.2,
+  }, o));
+}
+function castAll(obj) { obj.traverse(o => { if (o.isMesh) { o.castShadow = true; o.receiveShadow = true; } }); return obj; }
+
+/* =========================================================
+   Podiums (rounded cylinders) + halo ring, like the deck's product stage
+   ========================================================= */
+function podiumGeo(r, h, bev = 0.06) {
+  const pts = [new THREE.Vector2(0, 0), new THREE.Vector2(r, 0), new THREE.Vector2(r, h - bev)];
+  for (let i = 1; i <= 8; i++) {
+    const a = i / 8 * Math.PI / 2;
+    pts.push(new THREE.Vector2(r - bev + Math.cos(a) * bev, h - bev + Math.sin(a) * bev));
+  }
+  pts.push(new THREE.Vector2(0, h));
+  return new THREE.LatheGeometry(pts, 96);
+}
+function podiumMat(hex) {
+  return new THREE.MeshPhysicalMaterial({
+    color: new THREE.Color('#ffffff').lerp(new THREE.Color(hex), 0.45),
+    roughness: 0.42, clearcoat: 0.5, clearcoatRoughness: 0.25, sheen: 0.4, sheenColor: new THREE.Color('#ffffff'),
+  });
+}
+function addPodium(parent, r, h, hex, x, z) {
+  const m = new THREE.Mesh(podiumGeo(r, h), podiumMat(hex));
+  m.position.set(x, 0, z);
+  m.castShadow = m.receiveShadow = true;
+  parent.add(m);
+  return m;
+}
+
+/* =========================================================
+   AURA tube – Raghad's design: pearl cap tinted per shade, gold collar,
+   clear glass body, liquid in a 3-step gradient, vertical "AURA" label
+   ========================================================= */
+const CAP_Y = 1.16;                      // cap base height (tube frame)
+const STROKE_SEG = 220, STROKE_RAD = 12;
+
+const glassMat = new THREE.MeshPhysicalMaterial({
+  color: '#ffffff', metalness: 0, roughness: 0.03, transmission: 1, thickness: 0.4, ior: 1.5,
+  clearcoat: 1, clearcoatRoughness: 0.02, attenuationColor: new THREE.Color('#fff8f0'), attenuationDistance: 3,
+  specularIntensity: 1, envMapIntensity: 1.5,
+});
+const goldMat = new THREE.MeshPhysicalMaterial({
+  color: '#f4cd7a', metalness: 1, roughness: 0.2, clearcoat: 0.5, clearcoatRoughness: 0.1, envMapIntensity: 1.6,
+  emissive: new THREE.Color('#a8721f'), emissiveIntensity: 0.45,   // keeps the collar bright gold, like the deck
+});
+const wandMat = physMat('#f4ece2', { roughness: 0.5, clearcoat: 0 });
+
+const bottleGeo = new THREE.LatheGeometry([
+  [0.0, 0.0], [0.19, 0.0], [0.24, 0.015], [0.262, 0.055], [0.27, 0.13], [0.27, 1.05], [0.258, 1.1],
+  [0.222, 1.135], [0.2, 1.15], [0.2, 1.22], [0.0, 1.22],
+].map(([x, y]) => new THREE.Vector2(x, y)), 72);
+const capGeo = new THREE.LatheGeometry([
+  [0.0, 0.0], [0.258, 0.0], [0.258, 0.48], [0.252, 0.54], [0.235, 0.585], [0.2, 0.615], [0.14, 0.632], [0.0, 0.636],
+].map(([x, y]) => new THREE.Vector2(x, y)), 72);
+const collarGeo = new THREE.CylinderGeometry(0.268, 0.268, 0.075, 72);
+
+function liquidGeo(cols) {
+  const pts = [[0.0, 0.06], [0.17, 0.06], [0.2, 0.08], [0.215, 0.13], [0.215, 1.02], [0.0, 1.02]];
+  const geo = new THREE.LatheGeometry(pts.map(([x, y]) => new THREE.Vector2(x, y)), 48);
+  const [a, b, c] = cols.map(h => new THREE.Color(h));
+  const pos = geo.attributes.position, colors = [], col = new THREE.Color();
+  for (let i = 0; i < pos.count; i++) {
+    const h = clamp01((pos.getY(i) - 0.06) / 0.96);          // 0 bottom … 1 top
+    if (h > 0.72) col.copy(b).lerp(a, smooth((h - 0.72) / 0.28)); else col.copy(c).lerp(b, smooth(Math.min(1, h / 0.4)));
+    colors.push(col.r * 0.8, col.g * 0.8, col.b * 0.8);   // richer, like the deck's liquid
+  }
+  geo.setAttribute('color', new THREE.Float32BufferAttribute(colors, 3));
+  return geo;
+}
+
+function makeLabelTexture(num, short) {
+  const c = document.createElement('canvas'); c.width = 256; c.height = 768;
+  const tex = new THREE.CanvasTexture(c);
+  tex.colorSpace = THREE.SRGBColorSpace; tex.anisotropy = 8;
+  const draw = () => {
+    const g = c.getContext('2d');
+    g.clearRect(0, 0, 256, 768);
+    // vertical brand, like the deck (reads bottom → top)
+    g.save();
+    g.translate(128, 330); g.rotate(-Math.PI / 2);
+    g.textAlign = 'center'; g.textBaseline = 'middle';
+    g.fillStyle = 'rgba(255,255,255,.97)';
+    g.shadowColor = 'rgba(0,0,0,.28)'; g.shadowBlur = 10; g.shadowOffsetY = 2;
+    g.font = '700 118px "Cormorant Garamond", Georgia, serif';
+    if ('letterSpacing' in g) g.letterSpacing = '30px';
+    g.fillText('AURA', 15, 0);
+    g.restore();
+    // shade pill, like "01 דבש"
+    const label = `${num} ${short}`;
+    g.font = '700 40px Assistant, sans-serif';
+    g.direction = 'rtl';
+    const w = Math.min(236, g.measureText(label).width + 44);
+    g.fillStyle = 'rgba(0,0,0,.2)';
+    g.beginPath(); g.roundRect(128 - w / 2, 640, w, 62, 31); g.fill();
+    g.fillStyle = 'rgba(255,255,255,.95)';
+    g.textAlign = 'center'; g.textBaseline = 'middle';
+    g.fillText(label, 128, 673);
+    tex.needsUpdate = true;
+  };
+  draw();
+  if (document.fonts) Promise.all([
+    document.fonts.load('700 118px "Cormorant Garamond"'), document.fonts.load('700 40px Assistant'),
+  ]).then(draw).catch(() => {});
+  return tex;
+}
+
+function makeTube(sh, k) {
+  const grp = new THREE.Group();
+  const bottle = new THREE.Mesh(bottleGeo, glassMat);
+  grp.add(bottle);
+  const liquid = new THREE.Mesh(liquidGeo(sh.liquid), physMat('#ffffff', {
+    vertexColors: true, roughness: 0.22, clearcoat: 0.3, clearcoatRoughness: 0.1, envMapIntensity: 0.45,
+    emissive: new THREE.Color(sh.liquid[1]), emissiveIntensity: 0.04,
+  }));
+  liquid.castShadow = true;
+  grp.add(liquid);
+  const label = new THREE.Mesh(
+    new THREE.CylinderGeometry(0.273, 0.273, 0.92, 48, 1, true, -0.56, 1.12),
+    new THREE.MeshBasicMaterial({ map: makeLabelTexture(String(k + 1).padStart(2, '0'), sh.short), transparent: true, depthWrite: false, toneMapped: false })
+  );
+  label.position.y = 0.6;
+  grp.add(label);
+
+  const cap = new THREE.Group();
+  cap.add(new THREE.Mesh(capGeo, new THREE.MeshPhysicalMaterial({
+    color: sh.cap, roughness: 0.2, clearcoat: 1, clearcoatRoughness: 0.08,
+    sheen: 0.6, sheenColor: new THREE.Color('#ffffff'), iridescence: 0.25, iridescenceIOR: 1.3,
+  })));
+  const collar = new THREE.Mesh(collarGeo, goldMat);
+  collar.position.y = 0.0375;
+  cap.add(collar);
+  const wand = new THREE.Mesh(new THREE.CylinderGeometry(0.017, 0.017, 0.9, 12), wandMat);
+  wand.position.y = -0.45;
+  cap.add(wand);
+  const tip = new THREE.Mesh(new THREE.SphereGeometry(1, 24, 16),
+    physMat(sh.liquid[1], { roughness: 0.1, clearcoat: 1, emissive: new THREE.Color(sh.liquid[1]), emissiveIntensity: 0.12 }));
+  tip.scale.set(0.055, 0.12, 0.038);
+  tip.position.y = -0.88;
+  cap.add(tip);
+  cap.position.y = CAP_Y;
+  grp.add(cap);
+  castAll(grp);
+  label.castShadow = false;
+  return { grp, cap };
+}
+
+/* =========================================================
+   The foods – glossy and juicy, all from geometry
+   ========================================================= */
+const honeyMat = new THREE.MeshPhysicalMaterial({
+  color: '#ffc24d', roughness: 0.02, transmission: 0.8, thickness: 0.6, ior: 1.49,
+  attenuationColor: new THREE.Color('#e69217'), attenuationDistance: 0.3,
+  clearcoat: 1, clearcoatRoughness: 0.02, emissive: new THREE.Color('#e69217'), emissiveIntensity: 0.1,
+});
+function teardropGeo() {
+  const pts = [];
+  for (let k = 0; k <= 48; k++) {
+    const a = Math.PI * (1 - k / 48);
+    pts.push(new THREE.Vector2(Math.max(Math.sin(a) * (1 - Math.cos(a)) * 0.5, 0.0001), Math.cos(a)));
+  }
+  return new THREE.LatheGeometry(pts, 48);
+}
+
+function makeHoney() {
+  const g = new THREE.Group();
+  const wood = physMat('#c9965a', { roughness: 0.5, clearcoat: 0.25 });
+  const dip = new THREE.Group();
+  const handle = new THREE.Mesh(new THREE.CylinderGeometry(0.032, 0.042, 0.82, 16), wood);
+  handle.position.y = 0.36 + 0.41;
+  dip.add(handle);
+  // grooved dipper head
+  const H = 0.38, head = [new THREE.Vector2(0.0001, 0)];
+  for (let i = 0; i <= 60; i++) {
+    const y = i / 60 * H, e = Math.pow(Math.sin(Math.PI * (0.08 + 0.84 * y / H)), 0.6);
+    head.push(new THREE.Vector2(0.045 + e * (0.075 + 0.035 * (0.5 + 0.5 * Math.cos(y / H * Math.PI * 2 * 4.5))), y));
+  }
+  head.push(new THREE.Vector2(0.0001, H));
+  dip.add(new THREE.Mesh(new THREE.LatheGeometry(head, 48), wood));
+  // honey coating the lower half of the head
+  const coat = [new THREE.Vector2(0.0001, -0.03)];
+  for (let i = 0; i <= 30; i++) {
+    const y = i / 30 * 0.24, e = Math.pow(Math.sin(Math.PI * (0.08 + 0.84 * y / H)), 0.6);
+    coat.push(new THREE.Vector2(0.06 + e * 0.105 + 0.012 * Math.sin(i * 1.7), y - 0.02));
+  }
+  coat.push(new THREE.Vector2(0.0001, 0.22));
+  dip.add(new THREE.Mesh(new THREE.LatheGeometry(coat, 48), honeyMat));
+  dip.rotation.z = 0.5;
+  g.add(dip);
+  // a thread of honey and the falling drop
+  const thread = new THREE.Mesh(new THREE.CylinderGeometry(0.012, 0.03, 0.26, 12), honeyMat);
+  thread.position.set(0.0, -0.14, 0);
+  g.add(thread);
+  const drop = new THREE.Mesh(teardropGeo(), honeyMat);
+  drop.scale.setScalar(0.17);
+  drop.position.set(0.0, -0.36, 0);
+  g.add(drop);
+  g.position.y = 0.05;
+  const wrap = new THREE.Group(); wrap.add(g);
+  return wrap;
+}
+
+function makePeach() {
+  const g = new THREE.Group();
+  const geo = new THREE.SphereGeometry(0.42, 64, 40);
+  const pos = geo.attributes.position, n = new V(), colors = [];
+  const base = new THREE.Color('#ffb48a'), blush = new THREE.Color('#e8553a'), warm = new THREE.Color('#ffd08a'), c = new THREE.Color();
+  for (let i = 0; i < pos.count; i++) {
+    n.fromBufferAttribute(pos, i).normalize();
+    let f = 1 - 0.09 * Math.exp(-(n.x * n.x) / 0.006) * (1 - Math.pow(Math.abs(n.y), 4)); // the crease
+    if (n.y > 0.85) f -= 0.12 * (n.y - 0.85) / 0.15;                                          // top dimple
+    pos.setXYZ(i, n.x * 0.42 * f, n.y * 0.42 * f, n.z * 0.42 * f);
+    c.copy(base).lerp(warm, clamp01(-n.y * 0.6)).lerp(blush, smooth(clamp01((n.z * 0.7 + n.x * 0.4 + 0.1) * 0.9)));
+    colors.push(c.r, c.g, c.b);
+  }
+  geo.setAttribute('color', new THREE.Float32BufferAttribute(colors, 3));
+  geo.computeVertexNormals();
+  g.add(new THREE.Mesh(geo, new THREE.MeshPhysicalMaterial({
+    vertexColors: true, roughness: 0.6, sheen: 1, sheenColor: new THREE.Color('#ffe6d6'), sheenRoughness: 0.4,
+  })));
+  const leaf = new THREE.Mesh(new THREE.SphereGeometry(1, 20, 10), physMat('#5e8c46', { roughness: 0.4 }));
+  leaf.scale.set(0.2, 0.03, 0.09); leaf.position.set(0.14, 0.42, 0.02); leaf.rotation.z = -0.45;
+  g.add(leaf);
+  const stem = new THREE.Mesh(new THREE.CylinderGeometry(0.016, 0.022, 0.12, 8), physMat('#5a3a26', { roughness: 0.7, clearcoat: 0 }));
+  stem.position.y = 0.42;
+  g.add(stem);
+  // peach blossom (from the deck's 🌸)
+  const blossom = new THREE.Group();
+  const petalMat = physMat('#ffc7cf', { roughness: 0.45, clearcoat: 0.2, sheen: 1, sheenColor: new THREE.Color('#ffffff') });
+  for (let k = 0; k < 5; k++) {
+    const a = k / 5 * Math.PI * 2, p = new THREE.Mesh(new THREE.SphereGeometry(1, 16, 8), petalMat);
+    p.scale.set(0.1, 0.065, 0.018);
+    p.position.set(Math.cos(a) * 0.085, Math.sin(a) * 0.085, 0);
+    p.rotation.z = a;
+    blossom.add(p);
+  }
+  const ctr = new THREE.Mesh(new THREE.SphereGeometry(0.03, 12, 8), physMat('#f2b33d', { roughness: 0.6 }));
+  ctr.position.z = 0.02;
+  blossom.add(ctr);
+  blossom.position.set(0.36, -0.22, 0.28);
+  blossom.rotation.set(-0.2, 0.5, 0.3);
+  g.add(blossom);
+  return g;
+}
+
+function makeBerries() {
+  const g = new THREE.Group();
+  // strawberry
+  const SP = [[0.0005, -0.45], [0.06, -0.42], [0.14, -0.34], [0.22, -0.22], [0.28, -0.08], [0.31, 0.05], [0.31, 0.15], [0.27, 0.23], [0.18, 0.28], [0.0005, 0.3]];
+  const rAt = y => { for (let i = 1; i < SP.length; i++) if (y <= SP[i][1]) { const [r0, y0] = SP[i - 1], [r1, y1] = SP[i]; return r0 + (r1 - r0) * (y - y0) / (y1 - y0); } return 0; };
+  const straw = new THREE.Group();
+  const body = new THREE.LatheGeometry(SP.map(([x, y]) => new THREE.Vector2(x, y)), 64);
+  straw.add(new THREE.Mesh(body, physMat('#d81e3a', { roughness: 0.22, clearcoat: 1, clearcoatRoughness: 0.06, sheen: 0.3, sheenColor: new THREE.Color('#ff8a8a') })));
+  const seeds = [], N = 90;
+  for (let i = 0; i < N; i++) {
+    const y = -0.37 + (i + 0.5) / N * 0.6, a = i * 2.39996, r = rAt(y) * 0.985;
+    seeds.push(new V(Math.cos(a) * r, y, Math.sin(a) * r));
+  }
+  const seedMesh = new THREE.InstancedMesh(new THREE.SphereGeometry(0.011, 8, 6), physMat('#f5d27a', { roughness: 0.4 }), seeds.length);
+  const dummy = new THREE.Object3D();
+  seeds.forEach((p, i) => { dummy.position.copy(p); dummy.scale.set(1, 1.6, 1); dummy.updateMatrix(); seedMesh.setMatrixAt(i, dummy.matrix); });
+  straw.add(seedMesh);
+  const leafMat = physMat('#4f8a3a', { roughness: 0.45, clearcoat: 0.3 });
+  for (let k = 0; k < 7; k++) {
+    const piv = new THREE.Group(); piv.rotation.y = k / 7 * Math.PI * 2; piv.position.y = 0.29;
+    const leaf = new THREE.Mesh(new THREE.SphereGeometry(1, 14, 6), leafMat);
+    leaf.scale.set(0.15, 0.014, 0.05); leaf.position.x = 0.11; leaf.rotation.z = -0.3;
+    piv.add(leaf); straw.add(piv);
+  }
+  const stem = new THREE.Mesh(new THREE.CylinderGeometry(0.015, 0.02, 0.12, 8), leafMat);
+  stem.position.y = 0.35;
+  straw.add(stem);
+  straw.rotation.z = -0.25;
+  g.add(straw);
+  // blueberries with their frosty bloom and little crown
+  [[0.33, -0.27, 0.16, 0.13], [-0.3, -0.3, 0.1, 0.115]].forEach(([x, y, z, r]) => {
+    const b = new THREE.Group();
+    b.add(new THREE.Mesh(new THREE.SphereGeometry(r, 32, 20), new THREE.MeshPhysicalMaterial({
+      color: '#34345e', roughness: 0.42, sheen: 1, sheenColor: new THREE.Color('#aeb8e0'), sheenRoughness: 0.55,
+    })));
+    for (let k = 0; k < 5; k++) {
+      const a = k / 5 * Math.PI * 2, t = new THREE.Mesh(new THREE.ConeGeometry(r * 0.12, r * 0.22, 5), physMat('#22223e', { roughness: 0.6, clearcoat: 0 }));
+      t.position.set(Math.cos(a) * r * 0.18, r * 0.97, Math.sin(a) * r * 0.18);
+      b.add(t);
+    }
+    b.position.set(x, y, z); b.rotation.x = 0.6;
+    g.add(b);
+  });
+  return g;
+}
+
+function makePomegranate() {
+  const g = new THREE.Group();
+  const geo = new THREE.SphereGeometry(0.42, 56, 36);
+  const pos = geo.attributes.position, colors = [];
+  const a = new THREE.Color('#ba1128'), b = new THREE.Color('#7a0a1c'), y2 = new THREE.Color('#e0573f'), c = new THREE.Color();
+  for (let i = 0; i < pos.count; i++) {
+    const x = pos.getX(i), y = pos.getY(i), z = pos.getZ(i);
+    const nse = 0.5 + 0.5 * Math.sin(x * 11 + Math.sin(y * 9)) * Math.cos(z * 10 + y * 4);
+    c.copy(a).lerp(b, nse * 0.45 + (y < -0.3 ? 0.2 : 0)).lerp(y2, clamp01(y * 1.6 - 0.3) * 0.35);
+    colors.push(c.r, c.g, c.b);
+  }
+  geo.setAttribute('color', new THREE.Float32BufferAttribute(colors, 3));
+  const body = new THREE.Mesh(geo, new THREE.MeshPhysicalMaterial({ vertexColors: true, roughness: 0.3, clearcoat: 0.8, clearcoatRoughness: 0.2 }));
+  body.scale.y = 0.92;
+  g.add(body);
+  const crownMat = physMat('#8e1c2c', { roughness: 0.55, clearcoat: 0 });
+  const crown = new THREE.Mesh(new THREE.CylinderGeometry(0.09, 0.12, 0.13, 12, 1, true), crownMat);
+  crown.position.y = 0.42;
+  g.add(crown);
+  for (let k = 0; k < 6; k++) {
+    const t = new THREE.Mesh(new THREE.ConeGeometry(0.035, 0.1, 6), crownMat);
+    const an = k / 6 * Math.PI * 2;
+    t.position.set(Math.cos(an) * 0.09, 0.51, Math.sin(an) * 0.09);
+    t.rotation.set(Math.sin(an) * 0.5, 0, -Math.cos(an) * 0.5);
+    g.add(t);
+  }
+  const arils = new THREE.Group();                 // juicy seeds orbiting the fruit
+  const arilMat = new THREE.MeshPhysicalMaterial({
+    color: '#ff4760', roughness: 0.02, transmission: 0.7, thickness: 0.12, ior: 1.4,
+    attenuationColor: new THREE.Color('#ba1128'), attenuationDistance: 0.12, clearcoat: 1,
+  });
+  for (let k = 0; k < 7; k++) {
+    const s = new THREE.Mesh(new THREE.SphereGeometry(1, 16, 12), arilMat);
+    s.scale.set(0.05, 0.068, 0.05);
+    const an = k / 7 * Math.PI * 2;
+    s.position.set(Math.cos(an) * 0.6, Math.sin(an * 2) * 0.1, Math.sin(an) * 0.6);
+    s.rotation.z = an;
+    arils.add(s);
+  }
+  arils.rotation.x = 0.35;
+  g.add(arils);
+  g.userData.arils = arils;
+  return g;
+}
+
+function makeCocoa() {
+  const g = new THREE.Group();
+  // a piece of chocolate (2 × 2 squares on a slab)
+  const choc = physMat('#4a2412', { roughness: 0.26, clearcoat: 0.8, clearcoatRoughness: 0.15 });
+  const bar = new THREE.Group();
+  const slab = new THREE.Mesh(new RoundedBoxGeometry(0.5, 0.5, 0.07, 3, 0.02), choc);
+  bar.add(slab);
+  for (let i = 0; i < 2; i++) for (let j = 0; j < 2; j++) {
+    const sq = new THREE.Mesh(new RoundedBoxGeometry(0.2, 0.2, 0.07, 3, 0.03), choc);
+    sq.position.set(-0.115 + i * 0.23, -0.115 + j * 0.23, 0.055);
+    bar.add(sq);
+  }
+  bar.rotation.set(-0.15, 0.25, 0.32);
+  bar.position.set(-0.05, 0.12, 0);
+  g.add(bar);
+  // cocoa bean and coffee bean
+  const bean = (s, x, y, z, rz, col, seamCol) => {
+    const b = new THREE.Group();
+    const m = new THREE.Mesh(new THREE.SphereGeometry(1, 40, 24),
+      new THREE.MeshPhysicalMaterial({ color: col, roughness: 0.45, clearcoat: 0.4, sheen: 0.5, sheenColor: new THREE.Color('#c48a66'), sheenRoughness: 0.6 }));
+    m.scale.set(0.2, 0.33, 0.16);
+    b.add(m);
+    const seamGeo = new THREE.TorusGeometry(1, 0.03, 8, 72);
+    seamGeo.rotateY(Math.PI / 2);
+    seamGeo.scale(1, 0.33, 0.165);
+    b.add(new THREE.Mesh(seamGeo, physMat(seamCol, { roughness: 0.65, clearcoat: 0 })));
+    b.scale.setScalar(s); b.position.set(x, y, z); b.rotation.z = rz;
+    g.add(b);
+  };
+  bean(1, 0.3, -0.27, 0.2, -0.9, '#784121', '#4e2c18');
+  bean(0.62, -0.3, -0.3, 0.18, 0.7, '#3a1d0e', '#1e0e06');
+  return g;
+}
+const FOOD_MAKERS = [makeHoney, makePeach, makeBerries, makePomegranate, makeCocoa];
+
+/* =========================================================
+   Five stations – one per shade, far apart so each is alone in frame
+   ========================================================= */
+const STEP = 7;
+const PH = 0.55;                 // tube podium height
+const FOOD_POD = { x: -1.5, z: 0.5, h: 0.3, r: 0.6 };
+const FOOD_SCALE = 0.95;
+const haloMat = new THREE.MeshBasicMaterial({ color: '#ffffff', transparent: true, opacity: 0.6, depthWrite: false, toneMapped: false });
+
+const STATIONS = SHADES.map((sh, k) => {
+  const X = k * STEP;
+  const root = new THREE.Group();
+  root.position.x = X;
+  scene.add(root);
+  addPodium(root, 0.72, PH, sh.bg[1], 0, 0);
+  addPodium(root, FOOD_POD.r, FOOD_POD.h, sh.bg[1], FOOD_POD.x, FOOD_POD.z);
+
+  const tube = makeTube(sh, k);
+  tube.grp.position.y = PH;
+  root.add(tube.grp);
+
+  // halo ring around the tube (deck's "spatial halo")
+  const halo = new THREE.Mesh(new THREE.TorusGeometry(0.98, 0.006, 8, 160), haloMat);
+  halo.position.y = PH + 0.95;
+  root.add(halo);
+
+  // a glossy ribbon of the shade that swirls up around the tube (tube space)
+  const helix = [];
+  for (let i = 0; i <= 40; i++) {
+    const f = i / 40, a = -0.6 + f * Math.PI * 2 * 1.6;
+    const r = 0.48 + 0.1 * Math.sin(f * Math.PI);
+    helix.push(new V(Math.sin(a) * r, 0.12 + f * 1.5, Math.cos(a) * r));
+  }
+  const curve = new THREE.CatmullRomCurve3(helix, false, 'catmullrom', 0.5);
+  const strokeMat = physMat(sh.liquid[1], {
+    roughness: 0.1, clearcoat: 1, clearcoatRoughness: 0.04,
+    emissive: new THREE.Color(sh.liquid[0]), emissiveIntensity: 0.12,
+  });
+  const stroke = new THREE.Mesh(new THREE.TubeGeometry(curve, STROKE_SEG, 0.034, STROKE_RAD, false), strokeMat);
+  stroke.castShadow = true;
+  stroke.geometry.setDrawRange(0, 0);
+  tube.grp.add(stroke);
+
+  const food = castAll(FOOD_MAKERS[k]());
+  food.scale.setScalar(FOOD_SCALE);
+  root.add(food);
+
+  const tS = shadeStart(k);
+  const liftA = tS + 1.15;
+  return {
+    sh, X, root, tube, halo, curve, stroke, strokeMat, food, tS,
+    liftA, drawA: liftA + 0.25, drawB: liftA + 1.35,
+    foodHome: new V(FOOD_POD.x, FOOD_POD.h + 0.55, FOOD_POD.z),
+    foodFrom: new V(FOOD_POD.x, 4.2, FOOD_POD.z),
+  };
+});
+
+/* ---------- finale: all five tubes together, stepped podiums ---------- */
+const FX = 5 * STEP;
+const FINALE = SHADES.map((sh, k) => {
+  const root = new THREE.Group();
+  const h = [0.3, 0.45, 0.6, 0.45, 0.3][k];
+  root.position.set(FX + (k - 2) * 1.12, 0, -0.18 * Math.abs(k - 2));
+  scene.add(root);
+  addPodium(root, 0.46, h, sh.bg[1], 0, 0);
+  const tube = makeTube(sh, k);
+  tube.grp.position.y = h;
+  tube.grp.rotation.y = -(k - 2) * 0.1;
+  root.add(tube.grp);
+  const food = castAll(FOOD_MAKERS[k]());
+  food.scale.setScalar(0.34);
+  food.position.set(0.32, 0.17, 0.62);
+  root.add(food);
+  return { root, tube, food, h };
+});
+const finaleHalo = new THREE.Mesh(new THREE.TorusGeometry(3.1, 0.008, 8, 220), haloMat);
+finaleHalo.position.set(FX, 1.35, -0.4);
+scene.add(finaleHalo);
+
+/* =========================================================
+   Shade cards (HTML, deck typography)
+   ========================================================= */
+const cardsEl = document.getElementById('cards');
+const CARDS = SHADES.map((sh, k) => {
+  const el = document.createElement('div');
+  el.className = 'card';
+  el.style.color = sh.text[0];
+  el.innerHTML = `
+    <div class="badge" style="color:${sh.text[0]}"><i style="background:${sh.dot};box-shadow:0 0 10px ${sh.dot}"></i><span>גוון ${String(k + 1).padStart(2, '0')} • ${sh.flavor}</span></div>
+    <h2>${sh.he}</h2>
+    <div class="sub" dir="ltr" style="color:${sh.text[1]}">${sh.en.toUpperCase()}</div>
+    <div class="bar" style="background:linear-gradient(90deg, ${sh.liquid[2]}, ${sh.liquid[1]}, ${sh.liquid[0]});--glow:${sh.tube[0]}88"></div>`;
+  cardsEl.appendChild(el);
+  return { el, from: shadeStart(k) + 0.35, to: shadeStart(k) + SHADE_LEN - 0.4 };
+});
+
+/* =========================================================
+   Particles: swatch sparkles + floating bokeh (normal blending, light bg)
+   ========================================================= */
+function makePoints(n, size) {
+  const geo = new THREE.BufferGeometry();
+  geo.setAttribute('position', new THREE.BufferAttribute(new Float32Array(n * 3), 3));
+  geo.setAttribute('color', new THREE.BufferAttribute(new Float32Array(n * 4), 4));   // rgba
+  const p = new THREE.Points(geo, new THREE.PointsMaterial({
+    size, map: dotTex, vertexColors: true, transparent: true, depthWrite: false, sizeAttenuation: true,
+  }));
+  p.frustumCulled = false;
+  scene.add(p);
+  return p;
+}
+
+const drawEase = s => 0.5 * s + 0.5 * smooth(s);
+const drawEaseInv = u => { let lo = 0, hi = 1; for (let k = 0; k < 30; k++) { const m = (lo + hi) / 2; if (drawEase(m) < u) lo = m; else hi = m; } return lo; };
+
+const SPARK_PER = 44;
+const sparks = makePoints(STATIONS.length * SPARK_PER, 0.07);
+const sparkSeed = [];
+STATIONS.forEach((st, k) => {
+  for (let j = 0; j < SPARK_PER; j++) {
+    const u = Math.random();
+    sparkSeed.push({
+      k, t0: st.drawA + drawEaseInv(u) * (st.drawB - st.drawA), p: st.curve.getPointAt(u),
+      off: new V(Math.random() - 0.5, Math.random() - 0.3, Math.random() - 0.5).normalize(),
+      ph: Math.random() * 6.28, sp: 0.6 + Math.random() * 0.8,
+    });
+  }
+});
+const sparkCols = SHADES.map(s => new THREE.Color('#ffffff').lerp(new THREE.Color(s.liquid[0]), 0.45));
+
+const BOKEH_N = 170;
+const bokeh = makePoints(BOKEH_N, 0.16);
+const bokehSeed = Array.from({ length: BOKEH_N }, () => ({
+  x: -6 + Math.random() * (FX + 12), y: Math.random() * 5, z: -5 + Math.random() * 5,
+  sp: 0.05 + Math.random() * 0.12, ph: Math.random() * 6.28,
+}));
+
+/* =========================================================
+   Glows behind products (fed into the background shader)
+   ========================================================= */
+const GLOWS = [];
+STATIONS.forEach((st, k) => {
+  GLOWS.push({ pos: new V(st.X, PH + 1.0, -0.4), r: 1.25, col: new THREE.Color(st.sh.tube[0]), amt: () => 0.5 });
+  GLOWS.push({ pos: new V(st.X + FOOD_POD.x, FOOD_POD.h + 0.55, FOOD_POD.z - 0.4), r: 0.85, col: new THREE.Color(st.sh.liquid[0]),
+    amt: t => 0.55 * smooth(seg(t, st.tS + 0.55, st.tS + 1.2)) });
+});
+GLOWS.push({ pos: new V(FX, 1.4, -0.6), r: 3.0, col: new THREE.Color('#ffffff'), amt: () => 0.55 });
+const glowTmp = new V();
+
+/* =========================================================
+   Camera script
+   ========================================================= */
+const CAM = [
+  [0,    [0.15, 6.6, 7.2], [0.15, 6.0, 0]],     // looking into the warm sky
+  [0.9,  [0.15, 6.4, 7.0], [0.15, 5.8, 0]],
+];
+STATIONS.forEach((st, k) => {                    // arrive, then a slow push-in with a little arc
+  const cx = st.X + 0.15;
+  CAM.push([st.tS + (k === 0 ? 0.6 : 0.45), [cx + 0.35, 1.95, 6.3], [cx, 1.2, 0]]);
+  CAM.push([st.tS + SHADE_LEN - 0.45,         [cx - 0.2, 1.75, 5.6], [cx, 1.25, 0]]);
+});
+CAM.push(
+  [T_END + 0.9, [FX, 2.0, 8.6], [FX, 1.55, 0]],
+  [99,          [FX, 1.9, 8.0], [FX, 1.55, 0]],
+);
+const CAMK = CAM.map(([t, p, l]) => ({ t, p: new V(...p), l: new V(...l) }));
+const camPos = new V(), camLook = new V();
+function scriptCamera(t, wall) {
+  let k = 0;
+  while (k < CAMK.length - 2 && t >= CAMK[k + 1].t) k++;
+  const a = CAMK[k], b = CAMK[k + 1];
+  const e = easeInOutCubic(seg(t, a.t, b.t));
+  camPos.lerpVectors(a.p, b.p, e);
+  camLook.lerpVectors(a.l, b.l, e);
+  if (camera.aspect < 1) {                       // portrait: center the pair, card sits on top
+    const off = t < T_END ? -0.85 : 0;
+    camPos.x += off; camLook.x += off; camLook.y -= 0.35;
+  }
+  const aspectFix = Math.max(1, 1.7 / camera.aspect);   // keep everything in frame in narrow windows
+  camPos.sub(camLook).multiplyScalar(aspectFix).add(camLook);
+  camPos.x += 0.03 * Math.sin(wall * 0.7);
+  camPos.y += 0.02 * Math.sin(wall * 0.9);
+  camera.position.copy(camPos);
+  camera.lookAt(camLook);
+}
+
+/* =========================================================
+   Palette blending: intro (deck root) → five shades → end (root)
+   ========================================================= */
+const PAL = [ROOT, ...SHADES, ROOT].map(p => ({
+  bg: p.bg.map(h => new THREE.Color(h)), tube: p.tube.map(h => new THREE.Color(h)), text: p.text[0],
+}));
+const palA = [new THREE.Color(), new THREE.Color(), new THREE.Color(), new THREE.Color(), new THREE.Color()];
+function blendPalette(t) {
+  // index i is "on" from its start; the change happens during the camera move
+  const starts = [0, ...STATIONS.map(s => s.tS), T_END];
+  let i = 0;
+  while (i < starts.length - 1 && t >= starts[i + 1] - 0.4) i++;
+  const j = Math.max(0, i - 1);
+  const f = i === 0 ? 1 : smooth(seg(t, starts[i] - 0.4, starts[i] + 0.5));
+  const A = PAL[j], B = PAL[i];
+  for (let n = 0; n < 3; n++) palA[n].copy(A.bg[n]).lerp(B.bg[n], f);
+  palA[3].copy(A.tube[0]).lerp(B.tube[0], f);
+  palA[4].copy(A.tube[1]).lerp(B.tube[1], f);
+  return f > 0.5 ? B.text : A.text;
+}
+
+/* =========================================================
+   Per-frame update (everything is a function of t)
+   ========================================================= */
+const tmp = new V(), tip = new V(), wp = new V();
+const captions = [...document.querySelectorAll('.caption')].map(el => ({ el, from: +el.dataset.from, to: +el.dataset.to }));
+const introLogoEl = document.getElementById('introLogo');
+const logoEl = document.getElementById('logo');
+const sloganEl = document.getElementById('slogan');
+const progressEl = document.querySelector('#progress i');
+let lastTextCol = '';
+
+function update(t, wall) {
+  /* --- background --- */
+  const textCol = blendPalette(t);
+  const u = bgMat.uniforms;
+  u.uP.value.copy(palA[0]); u.uS.value.copy(palA[1]); u.uA.value.copy(palA[2]);
+  u.uO1.value.copy(palA[3]); u.uO2.value.copy(palA[4]);
+  u.uTime.value = wall;
+  u.uShift.value = camera.position.x * 0.02;
+  if (textCol !== lastTextCol) { document.documentElement.style.setProperty('--cap-color', textCol); lastTextCol = textCol; }
+
+  /* --- lights follow the camera's look point --- */
+  keyLight.position.set(camLook.x - 3.2, 7.5, 6.5);
+  keyLight.target.position.set(camLook.x, 0.6, 0);
+  rimLight.position.set(camLook.x + 3.5, 4, -5);
+  rimLight.target.position.set(camLook.x, 1, 0);
+
+  /* --- glows behind products: pick the strongest four on screen --- */
+  const tanH = Math.tan(THREE.MathUtils.degToRad(camera.fov / 2));
+  const list = [];
+  GLOWS.forEach(g => {
+    glowTmp.copy(g.pos).project(camera);
+    if (glowTmp.z > 1 || Math.abs(glowTmp.x) > 1.8 || Math.abs(glowTmp.y) > 1.8) return;
+    const a = g.amt(t);
+    if (a <= 0.001) return;
+    const dist = camera.position.distanceTo(g.pos);
+    list.push({ x: glowTmp.x * 0.5 + 0.5, y: glowTmp.y * 0.5 + 0.5, r: g.r / (2 * dist * tanH), col: g.col, a });
+  });
+  list.sort((p, q) => q.a - p.a);
+  for (let i = 0; i < NGLOW; i++) {
+    const g = list[i];
+    if (g) { u.uGP.value[i].set(g.x, g.y, g.r); u.uGC.value[i].set(g.col.r, g.col.g, g.col.b, g.a); }
+    else u.uGC.value[i].w = 0;
+  }
+
+  /* --- stations --- */
+  STATIONS.forEach((st, k) => {
+    const lt = t - st.tS;
+    const near = Math.abs(camLook.x - st.X) < STEP * 0.95;
+    st.root.visible = near;
+    if (!near) return;
+
+    // tube: gentle turn
+    st.tube.grp.rotation.y = -0.12 + 0.22 * Math.sin(lt * 0.8);
+    st.tube.grp.updateMatrixWorld();
+    st.halo.rotation.set(Math.PI / 2 - 0.32, 0, wall * 0.2);
+    st.halo.scale.setScalar(1 + 0.04 * Math.sin(wall * 1.1 + k));
+
+    // food drops in, lands, floats
+    const land = easeOutSoft(seg(lt, 0.15, 0.95));
+    st.food.visible = lt > 0.1;
+    st.food.position.lerpVectors(st.foodFrom, st.foodHome, land);
+    st.food.position.y += 0.05 * Math.sin(t * 1.6 + k) * seg(lt, 0.95, 1.4);
+    st.food.rotation.y = t * 0.5 + k * 1.3 + (1 - easeOutCubic(seg(lt, 0.15, 0.95))) * 2.5;
+    st.food.rotation.x = 0.1 * Math.sin(t * 0.7 + k);
+    if (st.food.userData.arils) st.food.userData.arils.rotation.y = t * 0.8;
+    else if (st.food.children[0]?.userData?.arils) st.food.children[0].userData.arils.rotation.y = t * 0.8;
+
+    // cap pops up a little, then a ribbon of the shade swirls up around the tube
+    const bump = Math.sin(Math.PI * seg(t, st.liftA, st.liftA + 0.55));
+    st.tube.cap.position.y = CAP_Y + 0.16 * bump;
+    st.tube.cap.rotation.y = 0.5 * bump;
+    const head = drawEase(seg(t, st.drawA, st.drawB));
+    const tail = smooth(seg(t, st.drawA + 0.55, st.drawB + 0.55));
+    const i0 = Math.floor(tail * STROKE_SEG), i1 = Math.floor(head * STROKE_SEG);
+    st.stroke.geometry.setDrawRange(i0 * STROKE_RAD * 6, Math.max(0, i1 - i0) * STROKE_RAD * 6);
+    st.stroke.visible = i1 > i0;
+  });
+
+  /* --- finale: tubes rise onto their podiums one after another --- */
+  FINALE.forEach((f, k) => {
+    const e = easeOutBack(seg(t, T_END + 0.15 + 0.12 * k, T_END + 0.95 + 0.12 * k));
+    f.root.visible = camLook.x > FX - STEP * 0.95;
+    f.tube.grp.position.y = f.h + (1 - e) * -0.15;
+    f.tube.grp.scale.setScalar(0.85 + 0.15 * e);
+    f.food.rotation.y = t * 0.5 + k;
+  });
+  finaleHalo.visible = camLook.x > FX - STEP * 0.6;
+  finaleHalo.rotation.set(Math.PI / 2 - 0.22, 0, wall * 0.1);
+
+  // sparkles peeling off the swatches
+  const sPos = sparks.geometry.attributes.position, sCol = sparks.geometry.attributes.color;
+  sparkSeed.forEach((p, i) => {
+    const st = STATIONS[p.k], since = t - p.t0;
+    const fade = 1 - seg(t, st.drawB + 0.4, st.drawB + 0.9);
+    if (since < 0 || fade <= 0 || !st.root.visible) { sCol.setW(i, 0); return; }
+    const d = 0.06 + since * 0.3 * p.sp;
+    wp.set(p.p.x + p.off.x * d, p.p.y + p.off.y * d + since * 0.1, p.p.z + p.off.z * d).applyMatrix4(st.tube.grp.matrixWorld);
+    sPos.setXYZ(i, wp.x, wp.y, wp.z);
+    const tw = 0.55 + 0.45 * Math.sin(wall * 14 * p.sp + p.ph);
+    const c = sparkCols[p.k];
+    sCol.setXYZW(i, c.r, c.g, c.b, Math.min(1, 1.2 * Math.exp(-since * 1.1) * tw * fade));
+  });
+  sPos.needsUpdate = true; sCol.needsUpdate = true;
+
+  /* --- bokeh --- */
+  const bPos = bokeh.geometry.attributes.position, bCol = bokeh.geometry.attributes.color;
+  bokehSeed.forEach((d, k) => {
+    const y = ((d.y + wall * d.sp) % 5 + 5) % 5;
+    bPos.setXYZ(k, d.x + 0.25 * Math.sin(wall * 0.2 + d.ph), y + 0.2, d.z);
+    bCol.setXYZW(k, 1, 0.97, 0.9, 0.35 + 0.25 * Math.sin(wall * 1.3 + d.ph));
+  });
+  bPos.needsUpdate = true; bCol.needsUpdate = true;
+
+  /* --- HTML overlay --- */
+  captions.forEach(c => c.el.classList.toggle('show', t >= c.from && t < c.to));
+  CARDS.forEach(c => c.el.classList.toggle('show', t >= c.from && t < c.to));
+  introLogoEl.classList.toggle('show', t >= 0.1 && t < 1.45);
+  logoEl.classList.toggle('show', t >= T_END + 0.7);
+  sloganEl.classList.toggle('show', t >= T_END + 1.2);
+  progressEl.style.width = (clamp01(t / DURATION) * 100).toFixed(2) + '%';
+}
+
+/* =========================================================
+   Soundtrack – Web Audio API only (no audio files)
+   A fresh, upbeat pop track at 137 BPM in D major, plus a short
+   musical signature for each shade.
+   ========================================================= */
+let actx = null, master, reverbIn, noiseBuf;
+
+function initAudio() {
+  if (actx) return;
+  const AC = window.AudioContext || window.webkitAudioContext;
+  if (!AC) return;
+  actx = new AC();
+  const comp = actx.createDynamicsCompressor();
+  comp.threshold.value = -14; comp.ratio.value = 3; comp.attack.value = 0.005; comp.release.value = 0.2;
+  master = actx.createGain(); master.gain.value = 0.8;
+  master.connect(comp); comp.connect(actx.destination);
+  // synthesized reverb (decaying noise impulse)
+  const len = actx.sampleRate * 2.2, ir = actx.createBuffer(2, len, actx.sampleRate);
+  for (let ch = 0; ch < 2; ch++) {
+    const d = ir.getChannelData(ch);
+    for (let i = 0; i < len; i++) d[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / len, 3);
+  }
+  const conv = actx.createConvolver(); conv.buffer = ir;
+  reverbIn = actx.createGain(); reverbIn.gain.value = 0.35;
+  reverbIn.connect(conv); conv.connect(master);
+  noiseBuf = actx.createBuffer(1, actx.sampleRate * 2, actx.sampleRate);
+  const nd = noiseBuf.getChannelData(0);
+  for (let i = 0; i < nd.length; i++) nd[i] = Math.random() * 2 - 1;
+}
+
+const mtof = m => 440 * Math.pow(2, (m - 69) / 12);
+function out(node, wet = 0.3, pan = 0) {
+  const p = actx.createStereoPanner(); p.pan.value = pan;
+  node.connect(p); p.connect(master);
+  if (wet > 0) { const s = actx.createGain(); s.gain.value = wet; p.connect(s); s.connect(reverbIn); }
+  return p;
+}
+function osc(type, freq, t0, t1, dest) {
+  const o = actx.createOscillator(); o.type = type; o.frequency.value = freq;
+  o.connect(dest); o.start(t0); o.stop(t1);
+  return o;
+}
+function perc(g, t0, peak, dec) {
+  g.gain.setValueAtTime(0.0001, t0);
+  g.gain.exponentialRampToValueAtTime(peak, t0 + 0.004);
+  g.gain.exponentialRampToValueAtTime(0.0001, t0 + dec);
+}
+
+/* --- drums --- */
+function kick(t, v = 0.5) {
+  const o = actx.createOscillator();
+  o.frequency.setValueAtTime(150, t); o.frequency.exponentialRampToValueAtTime(44, t + 0.12);
+  const g = actx.createGain(); perc(g, t, v, 0.34);
+  o.connect(g); g.connect(master); o.start(t); o.stop(t + 0.36);
+}
+function noiseHit(t, type, freq, q, v, dec, wet = 0.1, pan = 0) {
+  const src = actx.createBufferSource(); src.buffer = noiseBuf;
+  const f = actx.createBiquadFilter(); f.type = type; f.frequency.value = freq; f.Q.value = q;
+  const g = actx.createGain(); perc(g, t, v, dec);
+  src.connect(f); f.connect(g); out(g, wet, pan);
+  src.start(t, Math.random() * 1.5); src.stop(t + dec + 0.05);
+}
+const clap = (t, v = 0.2) => { [0, 0.011, 0.022].forEach(d => noiseHit(t + d, 'bandpass', 1500, 0.9, v * 0.7, 0.03, 0.1)); noiseHit(t + 0.03, 'bandpass', 1300, 0.7, v, 0.2, 0.35); };
+const hat = (t, v = 0.05, pan = 0.25) => noiseHit(t, 'highpass', 8000, 0.7, v, 0.05, 0.05, pan);
+const shaker = (t, v = 0.018) => noiseHit(t, 'bandpass', 6500, 1.2, v, 0.06, 0.05, -0.3);
+const crash = (t, v = 0.1) => noiseHit(t, 'highpass', 4500, 0.5, v, 1.8, 0.5);
+
+/* --- bass, chords --- */
+function bass(t, m, dur = 0.2, v = 0.2) {
+  const g = actx.createGain(); perc(g, t, v, dur);
+  const lp = actx.createBiquadFilter(); lp.type = 'lowpass'; lp.Q.value = 3;
+  lp.frequency.setValueAtTime(1100, t); lp.frequency.exponentialRampToValueAtTime(300, t + dur);
+  lp.connect(g); out(g, 0.02);
+  osc('sawtooth', mtof(m), t, t + dur + 0.05, lp);
+  const sg = actx.createGain(); perc(sg, t, v * 0.9, dur * 1.2); sg.connect(master);
+  osc('sine', mtof(m - 12), t, t + dur * 1.2 + 0.05, sg);
+}
+function stab(t, notes, v = 0.045, dur = 0.24) {
+  const lp = actx.createBiquadFilter(); lp.type = 'lowpass'; lp.Q.value = 2;
+  lp.frequency.setValueAtTime(3600, t); lp.frequency.exponentialRampToValueAtTime(700, t + dur);
+  const g = actx.createGain(); perc(g, t, v, dur);
+  lp.connect(g); out(g, 0.3);
+  notes.forEach((m, i) => [-9, 9].forEach(dt => { osc('sawtooth', mtof(m), t, t + dur + 0.05, lp).detune.value = dt + i; }));
+}
+function pad(t0, notes, dur, vol, att = 0.4, rel = 0.6, lpA = 600, lpB = 1600) {
+  const g = actx.createGain();
+  g.gain.setValueAtTime(0, t0);
+  g.gain.linearRampToValueAtTime(vol, t0 + att);
+  g.gain.setValueAtTime(vol, t0 + Math.max(att, dur - rel));
+  g.gain.linearRampToValueAtTime(0, t0 + dur);
+  const lp = actx.createBiquadFilter(); lp.type = 'lowpass';
+  lp.frequency.setValueAtTime(lpA, t0); lp.frequency.linearRampToValueAtTime(lpB, t0 + dur * 0.8);
+  lp.connect(g); out(g, 0.5);
+  notes.forEach(m => [-7, 7].forEach(dt => { osc('triangle', mtof(m), t0, t0 + dur + 0.1, lp).detune.value = dt; }));
+}
+
+/* --- signature instruments --- */
+function marimba(t, m, v = 0.16, pan = 0) {
+  const f = mtof(m);
+  [[1, 1, 0.55], [4, 0.25, 0.08], [9.9, 0.06, 0.03]].forEach(([mul, a, dec]) => {
+    const g = actx.createGain(); perc(g, t, v * a, dec); out(g, 0.3, pan);
+    osc('sine', f * mul, t, t + dec + 0.05, g);
+  });
+}
+function flute(t, m, dur, v = 0.09, pan = 0) {
+  const f = mtof(m);
+  const g = actx.createGain();
+  g.gain.setValueAtTime(0, t); g.gain.linearRampToValueAtTime(v, t + 0.07);
+  g.gain.setValueAtTime(v * 0.85, t + dur * 0.8); g.gain.linearRampToValueAtTime(0, t + dur + 0.12);
+  out(g, 0.45, pan);
+  const o = osc('sine', f, t, t + dur + 0.2, g);
+  const o2 = osc('triangle', f * 2, t, t + dur + 0.2, g); o2.detune.value = 3;
+  const lfo = actx.createOscillator(); lfo.frequency.value = 5.2;
+  const lg = actx.createGain(); lg.gain.setValueAtTime(0, t); lg.gain.linearRampToValueAtTime(f * 0.004, t + 0.25);
+  lfo.connect(lg); lg.connect(o.frequency); lfo.start(t); lfo.stop(t + dur + 0.2);
+  noiseHit(t, 'bandpass', f * 2, 3, v * 0.25, 0.12, 0.2, pan);       // breath
+}
+function pluckLead(t, m, v = 0.05, pan = 0) {
+  const lp = actx.createBiquadFilter(); lp.type = 'lowpass'; lp.Q.value = 4;
+  lp.frequency.setValueAtTime(5200, t); lp.frequency.exponentialRampToValueAtTime(900, t + 0.16);
+  const g = actx.createGain(); perc(g, t, v, 0.22);
+  lp.connect(g); out(g, 0.35, pan);
+  osc('square', mtof(m), t, t + 0.26, lp);
+}
+function bell(t, m, v = 1, pan = 0) {
+  const f = mtof(m);
+  [[1, 1], [2.01, 0.45], [3.0, 0.2], [4.17, 0.12], [5.43, 0.07]].forEach(([mul, a]) => {
+    const g = actx.createGain();
+    const dec = 2.0 / (mul * 0.6 + 0.4);
+    perc(g, t, 0.11 * a * v, dec);
+    osc('sine', f * mul, t, t + dec + 0.05, g);
+    out(g, 0.5, pan);
+  });
+}
+function epiano(t, m, v = 0.1, dur = 1.1, pan = 0) {
+  const f = mtof(m);
+  const trem = actx.createGain(); trem.gain.value = 1;
+  const lfo = actx.createOscillator(); lfo.frequency.value = 4.5;
+  const lg = actx.createGain(); lg.gain.value = 0.18; lfo.connect(lg); lg.connect(trem.gain);
+  lfo.start(t); lfo.stop(t + dur + 0.1);
+  out(trem, 0.35, pan);
+  [[1, 1, dur], [2, 0.3, 0.35], [3.01, 0.08, 0.15]].forEach(([mul, a, dec]) => {
+    const g = actx.createGain(); perc(g, t, v * a, dec); g.connect(trem);
+    osc('sine', f * mul, t, t + dec + 0.05, g);
+  });
+}
+
+/* --- small sound effects --- */
+function whoosh(t0, dur, vol = 0.1, f1 = 2400) {
+  const src = actx.createBufferSource(); src.buffer = noiseBuf; src.loop = true;
+  const bp = actx.createBiquadFilter(); bp.type = 'bandpass'; bp.Q.value = 1.3;
+  bp.frequency.setValueAtTime(300, t0);
+  bp.frequency.exponentialRampToValueAtTime(f1, t0 + dur * 0.6);
+  bp.frequency.exponentialRampToValueAtTime(600, t0 + dur);
+  const g = actx.createGain();
+  g.gain.setValueAtTime(0, t0); g.gain.linearRampToValueAtTime(vol, t0 + dur * 0.55); g.gain.linearRampToValueAtTime(0, t0 + dur);
+  src.connect(bp); bp.connect(g); out(g, 0.3);
+  src.start(t0); src.stop(t0 + dur + 0.05);
+}
+function riser(t0, dur, vol = 0.07) {
+  const src = actx.createBufferSource(); src.buffer = noiseBuf; src.loop = true;
+  const bp = actx.createBiquadFilter(); bp.type = 'bandpass'; bp.Q.value = 2;
+  bp.frequency.setValueAtTime(400, t0); bp.frequency.exponentialRampToValueAtTime(7000, t0 + dur);
+  const g = actx.createGain();
+  g.gain.setValueAtTime(0.0001, t0); g.gain.exponentialRampToValueAtTime(vol, t0 + dur);
+  g.gain.linearRampToValueAtTime(0, t0 + dur + 0.04);
+  src.connect(bp); bp.connect(g); out(g, 0.4);
+  src.start(t0); src.stop(t0 + dur + 0.06);
+}
+function pop(t0, f = 420, pan = 0) {
+  const o = actx.createOscillator(); o.type = 'sine';
+  o.frequency.setValueAtTime(f * 2.4, t0); o.frequency.exponentialRampToValueAtTime(f, t0 + 0.08);
+  const g = actx.createGain(); perc(g, t0, 0.16, 0.25);
+  o.connect(g); out(g, 0.25, pan); o.start(t0); o.stop(t0 + 0.3);
+  noiseHit(t0, 'highpass', 3000, 0.7, 0.1, 0.04, 0.2, pan);
+}
+function sparkle(t0, dur, n, vol = 1) {
+  for (let k = 0; k < n; k++) {
+    const tt = t0 + Math.pow(Math.random(), 0.8) * dur;
+    const g = actx.createGain();
+    const dec = 0.12 + Math.random() * 0.3;
+    perc(g, tt, (0.015 + Math.random() * 0.025) * vol, dec);
+    osc('sine', 2600 + Math.random() * 4200, tt, tt + dec + 0.02, g);
+    out(g, 0.6, Math.random() * 1.6 - 0.8);
+  }
+}
+
+/* --- the arrangement --- */
+const CHORDS = { D: [62, 66, 69], A: [61, 64, 69], Bm: [62, 66, 71], G: [62, 67, 71], Em: [62, 67, 71, 64] };
+const ROOTS = { D: 38, A: 45, Bm: 47, G: 43, Em: 40 };
+// bar 0 intro · bars 1–10 the five shades (2 bars each) · bars 11–13 end card
+const PROG = ['D', 'D', 'A', 'Bm', 'G', 'D', 'A', 'Bm', 'G', 'Em', 'A', 'D', 'D', 'D'];
+
+// each shade's signature: [beat, midi, (length in beats)]
+const SIGNATURES = [
+  { play: (t, n) => marimba(t, n[1], 0.17, -0.2),        // honey – warm golden marimba, rising
+    notes: [[0, 74], [0.5, 78], [1, 81], [1.5, 86], [2.5, 81], [3, 86]] },
+  { play: (t, n) => flute(t, n[1], n[2] * BEAT, 0.085, 0.15),   // peach – soft, velvety flute
+    notes: [[0, 78, 0.9], [1, 76, 0.45], [1.5, 74, 0.45], [2, 71, 1.6]] },
+  { play: (t, n) => pluckLead(t, n[1], 0.05, 0.2),       // berry – bright, playful plucks
+    notes: [[0, 81], [0.25, 78], [0.5, 81], [0.75, 86], [1, 90], [1.5, 86], [2, 81], [2.25, 86], [2.5, 90]] },
+  { play: (t, n) => bell(t, n[1], 0.9, -0.15),           // pomegranate – glassy jewel bells
+    notes: [[0, 83], [0.5, 90], [1, 86], [1.5, 95], [2, 90]] },
+  { play: (t, n) => epiano(t, n[1], n[1] < 60 ? 0.07 : 0.1, 1.2, 0.1),   // cocoa – mellow, silky e-piano
+    notes: [[0, 52], [0.1, 55], [0.2, 59], [0.3, 62], [1, 71], [1.5, 74], [2, 76], [3, 74]] },
+];
+
+function scheduleSound(b) {
+  const bar = i => b + i * BAR;
+
+  // intro bar: filtered pad opens up, ticking hats, riser into the drop
+  pad(b, [...CHORDS.D, 74], BAR + 0.2, 0.045, 0.3, 0.2, 400, 2200);
+  for (let i = 0; i < 4; i++) hat(b + (i + 0.5) * BEAT, 0.02 + 0.01 * i);
+  bell(b + 0.15, 86, 0.45);
+  riser(b + BAR - 1.1, 1.1, 0.06);
+
+  // bars 1–10: full groove
+  for (let i = 1; i <= 10; i++) {
+    const c = PROG[i], t = bar(i), notes = CHORDS[c], r = ROOTS[c];
+    pad(t, notes.map(m => m - 12), BAR + 0.05, 0.02, 0.15, 0.15, 700, 1100);
+    for (let q = 0; q < 4; q++) {
+      const bt = t + q * BEAT;
+      kick(bt, q === 0 ? 0.55 : 0.45);
+      if (q === 1 || q === 3) clap(bt);
+      hat(bt + BEAT / 2, 0.05);
+      shaker(bt + BEAT / 4); shaker(bt + 3 * BEAT / 4, 0.012);
+      stab(bt + BEAT / 2, notes, 0.04);
+    }
+    const bl = [r, r, r + 12, r, r + 7, r, r + 12, r + 10];
+    bl.forEach((m, e) => bass(t + e * BEAT / 2, m, e % 2 ? 0.14 : 0.2, e % 2 ? 0.15 : 0.2));
+  }
+  crash(bar(1), 0.09);
+
+  // each shade: whoosh on arrival, its signature, cap pop, sparkle on the swatch
+  STATIONS.forEach((st, k) => {
+    if (k > 0) whoosh(b + st.tS - 0.55, 0.95, 0.08, 2600);
+    const sig = SIGNATURES[k], s0 = b + st.tS + 2 * BEAT;
+    sig.notes.forEach(n => sig.play(s0 + n[0] * BEAT, n));
+    pop(b + st.liftA, 380 + k * 35);
+    sparkle(b + st.drawA, st.drawB - st.drawA + 0.3, 14, 0.8);
+    if (k > 0) crash(b + st.tS, 0.035);
+  });
+
+  // end card (bar 11): big D chord, "AURA" bell motif, long shimmering pad
+  riser(bar(11) - 1.2, 1.2, 0.07);
+  whoosh(b + T_END - 0.5, 1.2, 0.12, 2000);
+  const e = bar(11);
+  kick(e, 0.6); crash(e, 0.12);
+  bass(e, 38, 1.4, 0.22);
+  stab(e, [...CHORDS.D, 74, 78], 0.06, 0.5);
+  pad(e, [50, 57, 62, 66, 69, 76], 4.6, 0.05, 0.25, 2.2, 900, 2600);
+  [[0.5, 74], [1, 78], [1.5, 81], [2.5, 86]].forEach(([bt, m]) => bell(e + bt * BEAT, m, 0.85));
+  marimba(e + 4 * BEAT, 86, 0.12); marimba(e + 4.5 * BEAT, 90, 0.1); marimba(e + 5 * BEAT, 93, 0.08);
+  sparkle(e + 0.3, 2.2, 22, 0.8);
+}
+
+/* =========================================================
+   Playback state
+   ========================================================= */
+const intro = document.getElementById('intro');
+const endControls = document.getElementById('endControls');
+const orbitBtn = document.getElementById('orbitBtn');
+const orbitHint = document.getElementById('orbitHint');
+const progressBar = document.getElementById('progress');
+let state = 'idle', startAudio = 0, startPerf = 0, seekT = 0, orbit = false;
+
+function now() { return performance.now() / 1000; }
+function getT() {
+  if (state === 'idle') return 0;
+  if (state === 'seek') return seekT;
+  return actx ? actx.currentTime - startAudio : now() - startPerf;
+}
+
+async function play() {
+  initAudio();
+  if (actx) {
+    if (actx.state !== 'running') await actx.resume().catch(() => {});
+    startAudio = actx.currentTime + 0.12;
+    scheduleSound(startAudio);
+  }
+  startPerf = now() + 0.12;
+  setOrbit(false);
+  intro.classList.add('hide');
+  endControls.classList.remove('show');
+  progressBar.style.opacity = 1;
+  state = 'playing';
+}
+
+function setOrbit(on) {
+  orbit = on;
+  controls.enabled = on;
+  if (on) controls.target.copy(camLook);
+  orbitBtn.textContent = on ? 'חזרה למצלמת הסרט' : 'סיבוב חופשי במצלמה';
+  orbitHint.classList.toggle('show', on);
+}
+
+document.getElementById('playBtn').addEventListener('click', play);
+document.getElementById('replayBtn').addEventListener('click', play);
+orbitBtn.addEventListener('click', () => setOrbit(!orbit));
+addEventListener('keydown', e => {
+  if ((e.key === ' ' || e.key === 'Enter') && state === 'idle') { e.preventDefault(); play(); }
+});
+
+// dev aid: film-v3.html?t=14.5 freezes on that moment (no sound)
+const qT = new URLSearchParams(location.search).get('t');
+if (qT !== null && !isNaN(+qT)) { state = 'seek'; seekT = +qT; intro.classList.add('hide'); }
+
+/* ---------- resize (fills window / iframe) ---------- */
+function resize() {
+  const w = stage.clientWidth || innerWidth, h = stage.clientHeight || innerHeight;
+  renderer.setSize(w, h, false);
+  camera.aspect = w / h;
+  camera.updateProjectionMatrix();
+  bgMat.uniforms.uAspect.value = w / h;
+}
+addEventListener('resize', resize);
+resize();
+
+/* ---------- main loop ---------- */
+function frame(ms) {
+  requestAnimationFrame(frame);
+  const wall = ms / 1000;
+  const t = Math.max(0, getT());
+  if (state === 'playing' && t >= DURATION) {
+    state = 'ended';
+    endControls.classList.add('show');
+    progressBar.style.opacity = 0;
+  }
+  if (orbit) controls.update(); else scriptCamera(t, wall);
+  update(t, wall);
+  renderer.render(scene, camera);
+}
+requestAnimationFrame(frame);
+</script>
+</body>
+</html>

@@ -28,15 +28,17 @@ The presentation embeds a **3D animated ad** (Three.js). It also runs a **Python
 | **Tone** | Warm, natural, juicy and young. Not "cold luxury" |
 | **Insight** | Food-based sensory marketing: when a product looks tasty and has a food name, it creates "appetite", meaning the wish to buy. People pay for the story (lecture 1, the attention economy) |
 
-### Shades (draft)
+### Shades
 
-| Shade | Inspiration | HEX |
-|---|---|---|
-| Honey Glaze | Glowing honey | `#E8A33D` |
-| Peach Nectar | Peach nectar | `#F4A582` |
-| Berry Juice | Forest-berry juice | `#A3214B` |
-| Pomegranate Drop | A drop of pomegranate | `#C0283A` |
-| Cocoa Kiss | Cocoa | `#7A4A3A` |
+Names, colors and foods from Raghad's deck (`deck-v1.html`). HEX is the main color, the middle of the tube's light-to-dark gradient.
+
+| # | Shade | Hebrew name | Flavor / food | HEX (light → main → dark) |
+|---|---|---|---|---|
+| 01 | Golden Honey Glaze | דבש טהור | Honey | `#FFCF61` → **`#E69217`** → `#9C5304` |
+| 02 | Velvet Peach Nectar | אפרסק עסיסי | Peach | `#FFB299` → **`#F26C4B`** → `#B33216` |
+| 03 | Berry Crush Elixir | פירות יער | Strawberry and blueberry | `#FF7AA8` → **`#D42663`** → `#78072F` |
+| 04 | Ruby Pomegranate Jewel | רימון רובי | Pomegranate | `#FF4760` → **`#BA1128`** → `#59020E` |
+| 05 | Silk Cocoa Glaze | קקאו קטיפתי | Chocolate, cocoa and coffee beans | `#C47E54` → **`#784121`** → `#381906` |
 
 **Brand palette:** cream `#FFF6EC`, honey-gold `#D9A441`, deep plum `#4A1E3A`. Soft light, juicy shine and a glowing "aura" around every object.
 
@@ -158,7 +160,7 @@ The technical requirements are only the entry threshold. The lecturer grades pro
 | 13–16 s | The tube opens, and a juicy line of tint is drawn in the air | Sparkle | – |
 | 16–20 s | AURA logo, *Your glow, freshly made.* and "הזוהר שלך מתחיל כאן" | Closing tone | "הזוהר שלך מתחיל כאן" |
 
-**Change from the concept brief:** we added a cocoa bean, so that all **five** shades (including Cocoa Kiss) get an aura.
+**Change from the concept brief:** we added a cocoa bean, so that all **five** shades (including Silk Cocoa Glaze) get an aura.
 
 ### 6.3 Acceptance criteria – D2
 - [ ] Runs as one HTML file in Chrome and Edge without console errors, at a steady frame rate on a regular laptop.
@@ -179,7 +181,7 @@ Does a food name for a shade increase the wish to buy?
 ### 7.2 Model
 - **1,000 virtual customers.** Each one sees two shelves with the same five colors:
   - **Shelf A (numbered):** `Shade #01` … `Shade #05`
-  - **Shelf B (food names):** `Honey Glaze` … `Cocoa Kiss`
+  - **Shelf B (food names):** `Golden Honey Glaze` … `Silk Cocoa Glaze`
 - Each customer has a base purchase probability (with random variation between customers). On Shelf B it goes up by a **"name effect"** parameter, which is a demo assumption and not real data.
 - Output: the number of buyers per shelf, buyers per shade, and estimated revenue (buyers × the fictional price from slide 14).
 - Fixed random seed by default, so results are reproducible. A "new run" option gives a fresh seed.
