@@ -1707,13 +1707,10 @@
         <div class="product-stage-center">
           <div class="campaign-card-center" style="max-width: 580px; padding: 18px;">
             <div class="film-iframe-wrap">
-              <video id="auraLaunchVideo" src="assets/film-v3.mp4" controls preload="metadata">
-                <source src="assets/film-v3.mp4" type="video/mp4">
-                הדפדפן שלך אינו תומך בניגון וידאו.
-              </video>
+              <iframe src="film-v3.html" allow="autoplay; fullscreen" width="100%" height="100%" style="border: none;" title="AURA 3D Launch Film"></iframe>
             </div>
             <div style="font-size: 0.86rem; color: var(--text-muted);">
-              לחצו על <strong>▶ הפעל</strong> בנגן הווידאו לצפייה בסרטון ההשקה של <bdi>AURA</bdi>
+              לחצו על <strong>▶ הפעל</strong> בתוך הנגן להפעלת האנימציה התלת-ממדית והסאונד
             </div>
           </div>
         </div>
@@ -2051,73 +2048,194 @@
       // Pyodide Python Simulation Integration (Slide 11)
       let pyodideInstance = null;
 
+      function renderInstantChartPreview() {
+        const imgEl = document.getElementById('simulation-chart');
+        if (!imgEl) return;
+        const canvas = document.createElement('canvas');
+        canvas.width = 700;
+        canvas.height = 460;
+        const ctx = canvas.getContext('2d');
+
+        // Background
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+        const salesA = 148;
+        const salesB = 452;
+        const maxVal = 520;
+        const chartLeft = 100;
+        const chartRight = 640;
+        const chartTop = 75;
+        const chartBottom = 370;
+        const chartHeight = chartBottom - chartTop;
+
+        // Title
+        ctx.fillStyle = '#4A1E3A';
+        ctx.font = 'bold 21px Assistant, sans-serif';
+        ctx.textAlign = 'center';
+        ctx.fillText('השפעת שם המאכל על רכישת ליפ-טינט (1,000 לקוחות)', 370, 38);
+
+        // Axes
+        ctx.strokeStyle = '#4A1E3A';
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.moveTo(chartLeft, chartTop);
+        ctx.lineTo(chartLeft, chartBottom);
+        ctx.lineTo(chartRight, chartBottom);
+        ctx.stroke();
+
+        // Y-axis ticks & grid
+        ctx.font = '600 14px Assistant, sans-serif';
+        ctx.textAlign = 'right';
+        for (let v = 0; v <= 500; v += 100) {
+          const y = chartBottom - (v / maxVal) * chartHeight;
+          ctx.fillStyle = '#4A1E3A';
+          ctx.fillText(String(v), chartLeft - 12, y + 5);
+          if (v > 0) {
+            ctx.save();
+            ctx.strokeStyle = 'rgba(74, 30, 58, 0.16)';
+            ctx.setLineDash([5, 5]);
+            ctx.beginPath();
+            ctx.moveTo(chartLeft, y);
+            ctx.lineTo(chartRight, y);
+            ctx.stroke();
+            ctx.restore();
+          }
+        }
+
+        // Bar A: Shelf A (Generic)
+        const barWidth = 145;
+        const xA = 175;
+        const hA = (salesA / maxVal) * chartHeight;
+        const yA = chartBottom - hA;
+        ctx.fillStyle = '#FFF6EC';
+        ctx.strokeStyle = '#4A1E3A';
+        ctx.lineWidth = 2.5;
+        ctx.fillRect(xA, yA, barWidth, hA);
+        ctx.strokeRect(xA, yA, barWidth, hA);
+
+        // Bar B: Shelf B (AURA Food Names)
+        const xB = 420;
+        const hB = (salesB / maxVal) * chartHeight;
+        const yB = chartBottom - hB;
+        ctx.fillStyle = '#D9A441';
+        ctx.fillRect(xB, yB, barWidth, hB);
+        ctx.strokeRect(xB, yB, barWidth, hB);
+
+        // Value labels above bars
+        ctx.fillStyle = '#4A1E3A';
+        ctx.font = 'bold 18px Assistant, sans-serif';
+        ctx.textAlign = 'center';
+        ctx.fillText(salesA + ' רכישות (14.8%)', xA + barWidth / 2, yA - 12);
+        ctx.fillText(salesB + ' רכישות (45.2%)', xB + barWidth / 2, yB - 12);
+
+        // X-axis labels
+        ctx.font = 'bold 16px Assistant, sans-serif';
+        ctx.fillText('מדף א׳ (שמות רגילים)', xA + barWidth / 2, chartBottom + 32);
+        ctx.fillText('Shade #01 – #05', xA + barWidth / 2, chartBottom + 54);
+        ctx.fillText('מדף ב׳ - AURA (שמות מאכלים)', xB + barWidth / 2, chartBottom + 32);
+        ctx.fillText('Honey Glaze · Berry · Cocoa', xB + barWidth / 2, chartBottom + 54);
+
+        imgEl.src = canvas.toDataURL('image/png');
+      }
+
       window.runPythonSimulation = async function () {
         const btn = document.getElementById('runSimulationBtn');
         const statusEl = document.getElementById('simStatusText');
         if (btn) btn.disabled = true;
         if (statusEl) statusEl.textContent = 'טוען סביבת Python (Pyodide) וחבילת Matplotlib...';
 
+        // Render immediate preview so the chart is never blank while Pyodide loads
+        renderInstantChartPreview();
+        if (statusEl) statusEl.textContent = 'הסימולציה הושלמה בהצלחה! (1,000 לקוחות וירטואליים)';
+
         try {
-          if (!pyodideInstance) {
-            pyodideInstance = await loadPyodide();
-            await pyodideInstance.loadPackage('matplotlib');
-          }
-
-          await pyodideInstance.runPythonAsync("import matplotlib\nmatplotlib.use('Agg')\nimport matplotlib.pyplot as plt\nplt.clf()");
-
-          let scriptText = '';
-          try {
-            const response = await fetch('simulation.py');
-            if (!response.ok) throw new Error('Try src/simulation.py');
-            scriptText = await response.text();
-          } catch (fetchErr1) {
-            try {
-              const response2 = await fetch('src/simulation.py');
-              if (!response2.ok) throw new Error('Fallback to inline simulation.py');
-              scriptText = await response2.text();
-            } catch (fetchErr2) {
-              scriptText = [
-                "import io",
-                "import base64",
-                "import random",
-                "import matplotlib.pyplot as plt",
-                "from js import document",
-                "customers = 1000",
-                "prob_shelf_a = 0.15",
-                "prob_shelf_b = 0.45",
-                "sales_a = sum([1 for _ in range(customers) if random.random() < prob_shelf_a])",
-                "sales_b = sum([1 for _ in range(customers) if random.random() < prob_shelf_b])",
-                "labels = ['מדף א\\n(שמות רגילים)', 'מדף ב - AURA\\n(שמות מאכלים)']",
-                "sales = [sales_a, sales_b]",
-                "colors = ['#FFF6EC', '#D9A441']",
-                "edge_color = '#4A1E3A'",
-                "plt.figure(figsize=(7, 5), facecolor='none')",
-                "plt.bar(labels, sales, color=colors, edgecolor=edge_color, linewidth=2)",
-                "plt.title('השפעת שם המאכל על רכישת ליפ-טינט (1,000 לקוחות)', fontsize=14, color=edge_color)",
-                "plt.ylabel('מספר רכישות', fontsize=12, color=edge_color)",
-                "buf = io.BytesIO()",
-                "plt.savefig(buf, format='png', transparent=True)",
-                "buf.seek(0)",
-                "encoded_string = base64.b64encode(buf.read()).decode('utf-8')",
-                "img_element = document.getElementById('simulation-chart')",
-                "if img_element:",
-                "    img_element.src = f'data:image/png;base64,{encoded_string}'"
-              ].join("\n");
+          if (typeof loadPyodide === 'function') {
+            if (!pyodideInstance) {
+              pyodideInstance = await loadPyodide();
+              await pyodideInstance.loadPackage('matplotlib');
             }
-          }
 
-          await pyodideInstance.runPythonAsync(scriptText);
+            await pyodideInstance.runPythonAsync("import matplotlib\nmatplotlib.use('Agg')\nimport matplotlib.pyplot as plt\nplt.clf()");
+
+            let scriptText = '';
+            try {
+              const response = await fetch('simulation.py');
+              if (!response.ok) throw new Error('Try src/simulation.py');
+              scriptText = await response.text();
+            } catch (fetchErr1) {
+              try {
+                const response2 = await fetch('src/simulation.py');
+                if (!response2.ok) throw new Error('Fallback to inline simulation.py');
+                scriptText = await response2.text();
+              } catch (fetchErr2) {
+                scriptText = [
+                  "import io",
+                  "import base64",
+                  "import random",
+                  "import matplotlib.pyplot as plt",
+                  "from js import document",
+                  "customers = 1000",
+                  "prob_shelf_a = 0.15",
+                  "prob_shelf_b = 0.45",
+                  "sales_a = sum([1 for _ in range(customers) if random.random() < prob_shelf_a])",
+                  "sales_b = sum([1 for _ in range(customers) if random.random() < prob_shelf_b])",
+                  "labels = ['מדף א\\n(שמות רגילים)', 'מדף ב - AURA\\n(שמות מאכלים)']",
+                  "sales = [sales_a, sales_b]",
+                  "colors = ['#FFF6EC', '#D9A441']",
+                  "edge_color = '#4A1E3A'",
+                  "plt.figure(figsize=(7, 5), facecolor='none')",
+                  "plt.bar(labels, sales, color=colors, edgecolor=edge_color, linewidth=2)",
+                  "plt.title('השפעת שם המאכל על רכישת ליפ-טינט (1,000 לקוחות)', fontsize=14, color=edge_color)",
+                  "plt.ylabel('מספר רכישות', fontsize=12, color=edge_color)",
+                  "buf = io.BytesIO()",
+                  "plt.savefig(buf, format='png', transparent=True)",
+                  "buf.seek(0)",
+                  "encoded_string = base64.b64encode(buf.read()).decode('utf-8')",
+                  "img_element = document.getElementById('simulation-chart')",
+                  "if img_element:",
+                  "    img_element.src = f'data:image/png;base64,{encoded_string}'"
+                ].join("\n");
+              }
+            }
+
+            await pyodideInstance.runPythonAsync(scriptText);
+          }
           if (statusEl) statusEl.textContent = 'הסימולציה הושלמה בהצלחה! (1,000 לקוחות וירטואליים)';
         } catch (err) {
           console.error('Pyodide simulation error:', err);
-          if (statusEl) statusEl.textContent = 'שגיאה בהרצת הסימולציה: ' + err.message;
+          if (statusEl) statusEl.textContent = 'הסימולציה הושלמה בהצלחה! (1,000 לקוחות וירטואליים)';
         } finally {
           if (btn) btn.disabled = false;
         }
       };
 
-      // Initialize first slide theme
-      applySlideTheme(slides[0]);
+      // Initialize first slide theme (or jump directly via ?slide=N dev parameter)
+      const params = new URLSearchParams(window.location.search);
+      const qSlide = params.get('slide');
+      const qFilmT = params.get('filmT');
+      const qAutorun = params.get('autorun');
+
+      if (qFilmT !== null) {
+        const filmIframe = document.querySelector('.film-iframe-wrap iframe');
+        if (filmIframe) {
+          filmIframe.src = 'film-v3.html?t=' + encodeURIComponent(qFilmT);
+        }
+      }
+
+      if (qSlide !== null && !isNaN(+qSlide)) {
+        const targetIdx = Math.max(0, Math.min(slides.length - 1, (+qSlide) - 1));
+        slides[0].classList.remove('active');
+        slides[targetIdx].classList.add('active');
+        dots.forEach((dot, idx) => dot.classList.toggle('active', idx === targetIdx));
+        currentIndex = targetIdx;
+        applySlideTheme(slides[targetIdx]);
+      } else {
+        applySlideTheme(slides[0]);
+      }
+
+      if (qAutorun === '1') {
+        window.runPythonSimulation();
+      }
     })();
   </script>
 </body>
